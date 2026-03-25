@@ -14,6 +14,8 @@
 		B005 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A005 /* SidebarView.swift */; };
 		B006 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A006 /* EditorView.swift */; };
 		B007 /* MarkdownPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = A007 /* MarkdownPreview.swift */; };
+		B008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A008 /* Assets.xcassets */; };
+		B009 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A009 /* AppIcon.icns */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +26,8 @@
 		A005 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		A006 /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
 		A007 /* MarkdownPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownPreview.swift; sourceTree = "<group>"; };
+		A008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A009 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		PROD /* lsNote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = lsNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -48,6 +52,8 @@
 				A005 /* SidebarView.swift */,
 				A006 /* EditorView.swift */,
 				A007 /* MarkdownPreview.swift */,
+				A008 /* Assets.xcassets */,
+				A009 /* AppIcon.icns */,
 			);
 			path = lsNote;
 			sourceTree = "<group>";
@@ -126,6 +132,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B008 /* Assets.xcassets in Resources */,
+				B009 /* AppIcon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,6 +292,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleIconFile = AppIcon;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -311,6 +320,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleIconFile = AppIcon;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
