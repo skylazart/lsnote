@@ -14,6 +14,10 @@ class NoteStore: ObservableObject {
 
     init() { load() }
 
+    var allTags: [String] {
+        Array(Set(notes.flatMap(\.tags))).sorted()
+    }
+
     var selectedNote: Note? {
         get { notes.first { $0.id == selectedID } }
     }
