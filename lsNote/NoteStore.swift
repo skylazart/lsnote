@@ -4,6 +4,7 @@ import Foundation
 class NoteStore: ObservableObject {
     @Published var notes: [Note] = []
     @Published var selectedID: UUID?
+    @Published var isPreview: Bool = false
 
     private let saveURL: URL = {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]

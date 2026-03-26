@@ -5,7 +5,6 @@ struct EditorView: View {
     let note: Note
 
     @State private var text: String = ""
-    @State private var isPreview = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -13,7 +12,7 @@ struct EditorView: View {
             Divider()
             TagBarView(note: note)
             Divider()
-            if isPreview {
+            if store.isPreview {
                 MarkdownPreview(text: text)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -39,7 +38,7 @@ struct EditorView: View {
                 .font(.headline)
                 .padding(.leading, 12)
             Spacer()
-            Picker("", selection: $isPreview) {
+            Picker("", selection: $store.isPreview) {
                 Label("Edit", systemImage: "pencil").tag(false)
                 Label("Preview", systemImage: "eye").tag(true)
             }
