@@ -17,6 +17,10 @@ struct Note: Identifiable, Codable, Equatable {
 
         let f = DateFormatter()
         f.dateFormat = "EEEE, MMMM d yyyy"
-        self.title = f.string(from: date)
+        let datePart = f.string(from: date)
+
+        let t = DateFormatter()
+        t.dateFormat = "h:mm a"
+        self.title = "\(datePart) · \(t.string(from: date))"
     }
 }

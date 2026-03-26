@@ -16,6 +16,12 @@ struct lsNoteApp: App {
                 }
                 .keyboardShortcut("n", modifiers: .command)
             }
+            CommandGroup(replacing: .textEditing) {
+                Button("Search") {
+                    NotificationCenter.default.post(name: .focusSearch, object: nil)
+                }
+                .keyboardShortcut("f", modifiers: [.command, .shift])
+            }
         }
     }
 }
