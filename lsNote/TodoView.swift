@@ -11,7 +11,7 @@ private func parseTodos(_ body: String) -> [TodoItem] {
         .enumerated()
         .compactMap { (i, line) in
             if line.hasPrefix("- [ ] ") { return TodoItem(id: i, text: String(line.dropFirst(6)), done: false) }
-            if line.hasPrefix("- [x] ") { return TodoItem(id: i, text: String(line.dropFirst(6)), done: true) }
+            if line.hasPrefix("- [x] ") || line.hasPrefix("- [X] ") { return TodoItem(id: i, text: String(line.dropFirst(6)), done: true) }
             return nil
         }
 }
@@ -79,8 +79,9 @@ struct TodoView: View {
         guard lineIndex < lines.count else { return }
         if done {
             lines[lineIndex] = lines[lineIndex].replacingOccurrences(of: "- [x] ", with: "- [ ] ", range: lines[lineIndex].startIndex..<lines[lineIndex].index(lines[lineIndex].startIndex, offsetBy: 6))
+            lines[lineIndex] = lines[lineIndex].replacingOccurrences(of: "- [X] ", with: "- [ ] ", range: lines[lineIndex].startIndex..<lines[lineIndex].index(lines[lineIndex].startIndex, offsetBy: 6))
         } else {
-            lines[lineIndex] = lines[lineIndex].replacingOccurrences(of: "- [ ] ", with: "- [x] ", range: lines[lineIndex].startIndex..<lines[lineIndex].index(lines[lineIndex].startIndex, offsetBy: 6))
+            lines[lineIndex] = lines[lineIndex].replacingOccurrences(of: "- [ ] ", with: "- [X] ", range: lines[lineIndex].startIndex..<lines[lineIndex].index(lines[lineIndex].startIndex, offsetBy: 6))
         }
         var updated = note
         updated.body = lines.joined(separator: "\n")

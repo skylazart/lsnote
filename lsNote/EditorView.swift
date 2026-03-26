@@ -22,6 +22,9 @@ struct EditorView: View {
             }
         }
         .onAppear { text = note.body }
+        .onChange(of: note.body) { _, newValue in
+            if text != newValue { text = newValue }
+        }
         .onChange(of: text) { _, newValue in
             var updated = note
             updated.body = newValue
