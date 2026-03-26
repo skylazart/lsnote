@@ -23,11 +23,6 @@ class NoteStore: ObservableObject {
     }
 
     func createNote() {
-        let today = Calendar.current.startOfDay(for: .now)
-        if let existing = notes.first(where: { Calendar.current.startOfDay(for: $0.createdAt) == today }) {
-            selectedID = existing.id
-            return
-        }
         let note = Note()
         notes.insert(note, at: 0)
         selectedID = note.id
