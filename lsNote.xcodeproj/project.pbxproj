@@ -14,6 +14,7 @@
 		B005 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A005 /* SidebarView.swift */; };
 		B006 /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A006 /* EditorView.swift */; };
 		B007 /* MarkdownPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = A007 /* MarkdownPreview.swift */; };
+		B010 /* TodoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A010 /* TodoView.swift */; };
 		B008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A008 /* Assets.xcassets */; };
 		B009 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A009 /* AppIcon.icns */; };
 /* End PBXBuildFile section */
@@ -26,6 +27,7 @@
 		A005 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		A006 /* EditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
 		A007 /* MarkdownPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownPreview.swift; sourceTree = "<group>"; };
+		A010 /* TodoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoView.swift; sourceTree = "<group>"; };
 		A008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A009 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		PROD /* lsNote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = lsNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,6 +54,7 @@
 				A005 /* SidebarView.swift */,
 				A006 /* EditorView.swift */,
 				A007 /* MarkdownPreview.swift */,
+				A010 /* TodoView.swift */,
 				A008 /* Assets.xcassets */,
 				A009 /* AppIcon.icns */,
 			);
@@ -151,6 +154,7 @@
 				B005 /* SidebarView.swift in Sources */,
 				B006 /* EditorView.swift in Sources */,
 				B007 /* MarkdownPreview.swift in Sources */,
+				B010 /* TodoView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
