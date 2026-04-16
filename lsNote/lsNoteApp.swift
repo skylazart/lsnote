@@ -4,6 +4,10 @@ import SwiftUI
 struct lsNoteApp: App {
     @StateObject private var store = NoteStore()
 
+    init() {
+        UserDefaults.standard.set(0.3, forKey: "NSInitialToolTipDelay")
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()

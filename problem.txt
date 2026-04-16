@@ -1,0 +1,16 @@
+MD content:
+
+## Recommended Actions
+
+1. **[High]** Execute cleanup of 796 stuck files on pod-1 using `pod1-stuck-files.txt`.
+2. **[Medium]** Investigate why CGW01 connected directly to pod-1 during April 7–9 — review pod-0 availability logs and service endpoint configuration for that window.
+3. **[Low]** Consider aligning `encrypt.commands[6]` mtime to `+3` to match the SPPAS baseline and reduce disk usage, if retention of 7 days is not a business requirement.
+
+PREVIEW:
+
+Recommended Actions
+
+
+[High] Execute cleanup of 796 stuck files on pod-1 using pod1-stuck-files.txt.
+[High] Execute cleanup of 796 stuck files on pod-1 using pod1-stuck-files.txt.
+[High] Execute cleanup of 796 stuck files on pod-1 using pod1-stuck-files.txt.

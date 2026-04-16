@@ -23,8 +23,10 @@ struct TodoView: View {
         store.notes.filter { $0.tags.contains("todo") }
     }
 
-    private var allItems: [(note: Note, item: TodoItem)] {
-        todoNotes.flatMap { note in parseTodos(note.body).map { (note, $0) } }
+    private var allItems: [(id: String, note: Note, item: TodoItem)] {
+        todoNotes.flatMap { note in
+            parseTodos(note.body).map { (id: "\(note.id)-\($0.id)", note: note, item: $0) }
+        }
     }
 
     var body: some View {
@@ -34,14 +36,14 @@ struct TodoView: View {
         List {
             if !pending.isEmpty {
                 Section("Pending") {
-                    ForEach(pending, id: \.item.id) { pair in
+                    ForEach(pending, id: \.id) { pair in
                         row(pair.note, pair.item)
                     }
                 }
             }
             if !done.isEmpty {
                 Section("Done") {
-                    ForEach(done, id: \.item.id) { pair in
+                    ForEach(done, id: \.id) { pair in
                         row(pair.note, pair.item)
                     }
                 }

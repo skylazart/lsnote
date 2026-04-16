@@ -38,12 +38,14 @@ class NoteStore: ObservableObject {
 
     func deleteEmptyNote(id: UUID) {
         guard let note = notes.first(where: { $0.id == id }), note.isEmpty else { return }
+        ImageStore.deleteAll(noteID: id)
         notes.removeAll { $0.id == id }
         if selectedID == id { selectedID = notes.first?.id }
         save()
     }
 
     func delete(id: UUID) {
+        ImageStore.deleteAll(noteID: id)
         notes.removeAll { $0.id == id }
         if selectedID == id { selectedID = notes.first?.id }
         save()

@@ -4,6 +4,7 @@ import WebKit
 /// Renders GitHub-flavored Markdown using a lightweight inline HTML renderer.
 struct MarkdownPreview: NSViewRepresentable {
     let text: String
+    var note: Note? = nil
 
     func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
@@ -13,13 +14,14 @@ struct MarkdownPreview: NSViewRepresentable {
     }
 
     func updateNSView(_ webView: WKWebView, context: Context) {
-        webView.loadHTMLString(html(for: text), baseURL: nil)
+        webView.loadHTMLString(html(for: text, attachments: note?.attachments ?? [], noteID: note?.id),
+                               baseURL: nil)
     }
 
     // MARK: - Minimal GFM renderer
 
-    private func html(for markdown: String) -> String {
-        """
+    private func html(for markdown: String, attachments: [String], noteID: UUID?) -> String {
+        return """
         <!DOCTYPE html>
         <html>
         <head>
@@ -45,6 +47,9 @@ struct MarkdownPreview: NSViewRepresentable {
           summary::-webkit-details-marker { display: none; }
           summary::before { content: "▶ "; font-size: 10px; }
           details[open] summary::before { content: "▼ "; }
+          figure { margin: 12px 0; }
+          figure img { display: block; border-radius: 6px; }
+          figcaption { font-size: 12px; color: #888; margin-top: 4px; }
           @media (prefers-color-scheme: dark) {
             body { color: #f2f2f7; }
             pre, p > code { background: #2c2c2e; }
@@ -53,15 +58,16 @@ struct MarkdownPreview: NSViewRepresentable {
             th, td { border-color: #444; }
             details { border-color: #444; }
             summary { background: #3a3a3c; }
+            figcaption { color: #888; }
           }
         </style>
         </head>
-        <body>\(renderMarkdown(markdown))</body>
+        <body>\(renderMarkdown(markdown, noteID: noteID))</body>
         </html>
         """
     }
 
-    private func renderMarkdown(_ md: String) -> String {
+    private func renderMarkdown(_ md: String, noteID: UUID?) -> String {
         var lines = md.components(separatedBy: "\n")
         var html = ""
         var i = 0
@@ -87,7 +93,7 @@ struct MarkdownPreview: NSViewRepresentable {
             // Headings
             if let m = line.range(of: "^(#{1,6}) (.+)$", options: .regularExpression) {
                 let hashes = line[line.startIndex..<line.firstIndex(of: " ")!].count
-                let text = inline(String(line.dropFirst(hashes + 1)))
+                let text = inline(String(line.dropFirst(hashes + 1)), noteID: noteID)
                 html += "<h\(hashes)>\(text)</h\(hashes)>\n"
                 i += 1; continue
             }
@@ -99,7 +105,7 @@ struct MarkdownPreview: NSViewRepresentable {
 
             // Blockquote
             if line.hasPrefix("> ") {
-                html += "<blockquote>\(inline(String(line.dropFirst(2))))</blockquote>\n"
+                html += "<blockquote>\(inline(String(line.dropFirst(2)), noteID: noteID))</blockquote>\n"
                 i += 1; continue
             }
 
@@ -107,7 +113,7 @@ struct MarkdownPreview: NSViewRepresentable {
             if line.matches("^[\\-\\*\\+] .+") {
                 html += "<ul>\n"
                 while i < lines.count && lines[i].matches("^[\\-\\*\\+] .+") {
-                    html += "<li>\(inline(String(lines[i].dropFirst(2))))</li>\n"
+                    html += "<li>\(inline(String(lines[i].dropFirst(2)), noteID: noteID))</li>\n"
                     i += 1
                 }
                 html += "</ul>\n"; continue
@@ -117,8 +123,8 @@ struct MarkdownPreview: NSViewRepresentable {
             if line.matches("^\\d+\\. .+") {
                 html += "<ol>\n"
                 while i < lines.count && lines[i].matches("^\\d+\\. .+") {
-                    let text = line.components(separatedBy: ". ").dropFirst().joined(separator: ". ")
-                    html += "<li>\(inline(text))</li>\n"
+                    let text = lines[i].components(separatedBy: ". ").dropFirst().joined(separator: ". ")
+                    html += "<li>\(inline(text, noteID: noteID))</li>\n"
                     i += 1
                 }
                 html += "</ol>\n"; continue
@@ -127,12 +133,12 @@ struct MarkdownPreview: NSViewRepresentable {
             // Table (GFM)
             if i + 1 < lines.count && lines[i + 1].matches("^[\\|\\- :]+$") {
                 let headers = lines[i].split(separator: "|", omittingEmptySubsequences: true)
-                    .map { inline(String($0).trimmingCharacters(in: .whitespaces)) }
+                    .map { inline(String($0).trimmingCharacters(in: .whitespaces), noteID: noteID) }
                 html += "<table><thead><tr>" + headers.map { "<th>\($0)</th>" }.joined() + "</tr></thead><tbody>\n"
                 i += 2
                 while i < lines.count && lines[i].contains("|") {
                     let cells = lines[i].split(separator: "|", omittingEmptySubsequences: true)
-                        .map { inline(String($0).trimmingCharacters(in: .whitespaces)) }
+                        .map { inline(String($0).trimmingCharacters(in: .whitespaces), noteID: noteID) }
                     html += "<tr>" + cells.map { "<td>\($0)</td>" }.joined() + "</tr>\n"
                     i += 1
                 }
@@ -145,15 +151,49 @@ struct MarkdownPreview: NSViewRepresentable {
             }
 
             // Paragraph
-            html += "<p>\(inline(line))</p>\n"
+            html += "<p>\(inline(line, noteID: noteID))</p>\n"
             i += 1
         }
         return html
     }
 
     // Inline formatting
-    private func inline(_ s: String) -> String {
+    private func inline(_ s: String, noteID: UUID?) -> String {
         var t = s
+        // Attachment images: ![title](attachment:filename.png 400x300)
+        // dimensions optional: 400x300, 400x, x300, or omitted
+        if let noteID {
+            let pattern = #"!\[([^\]]*)\]\(attachment:([^\s\)]+)(?:\s+(\d*)x(\d*))?\)"#
+            if let regex = try? NSRegularExpression(pattern: pattern) {
+                let ns = t as NSString
+                let matches = regex.matches(in: t, range: NSRange(t.startIndex..., in: t))
+                for match in matches.reversed() {
+                    let title    = match.range(at: 1).location != NSNotFound ? ns.substring(with: match.range(at: 1)) : ""
+                    let filename = match.range(at: 2).location != NSNotFound ? ns.substring(with: match.range(at: 2)) : ""
+                    let wStr     = match.range(at: 3).location != NSNotFound ? ns.substring(with: match.range(at: 3)) : ""
+                    let hStr     = match.range(at: 4).location != NSNotFound ? ns.substring(with: match.range(at: 4)) : ""
+
+                    guard let img = ImageStore.load(filename: filename, noteID: noteID),
+                          let tiff = img.tiffRepresentation,
+                          let rep = NSBitmapImageRep(data: tiff),
+                          let png = rep.representation(using: .png, properties: [:]) else { continue }
+
+                    let b64 = png.base64EncodedString()
+                    var style = "border-radius:6px;max-width:100%;"
+                    if !wStr.isEmpty { style += "width:\(wStr)px;" }
+                    if !hStr.isEmpty { style += "height:\(hStr)px;" }
+
+                    let imgTag = "<img src='data:image/png;base64,\(b64)' alt='\(title)' style='\(style)'>"
+                    let html = title.isEmpty
+                        ? "<figure>\(imgTag)</figure>"
+                        : "<figure>\(imgTag)<figcaption>\(title)</figcaption></figure>"
+
+                    if let swiftRange = Range(match.range, in: t) {
+                        t.replaceSubrange(swiftRange, with: html)
+                    }
+                }
+            }
+        }
         // Bold+italic
         t = t.replacingOccurrences(of: #"\*\*\*(.+?)\*\*\*"#, with: "<strong><em>$1</em></strong>", options: .regularExpression)
         // Bold
@@ -168,7 +208,7 @@ struct MarkdownPreview: NSViewRepresentable {
         t = t.replacingOccurrences(of: #"`(.+?)`"#, with: "<code>$1</code>", options: .regularExpression)
         // Links
         t = t.replacingOccurrences(of: #"\[(.+?)\]\((.+?)\)"#, with: "<a href=\"$2\">$1</a>", options: .regularExpression)
-        // Images
+        // Standard images
         t = t.replacingOccurrences(of: #"!\[(.+?)\]\((.+?)\)"#, with: "<img alt=\"$1\" src=\"$2\">", options: .regularExpression)
         return t
     }
