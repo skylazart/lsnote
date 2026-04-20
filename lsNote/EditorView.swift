@@ -134,6 +134,15 @@ struct EditorView: View {
 
             if !store.isPreview {
                 Button {
+                    openFindBar()
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+                .help("Find in Note (⌘F)")
+
+                Button {
                     MarkdownTextEditor.wrapSelection(in: textView, with: "**")
                 } label: {
                     Image(systemName: "bold")
