@@ -8,6 +8,10 @@ struct EditorView: View {
 
     @State private var text: String = ""
     @State private var textView: NSTextView? = nil
+    @State private var showFind = false
+    @State private var findQuery = ""
+    @State private var matchIndex = 0
+    @State private var matchCount = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -15,6 +19,17 @@ struct EditorView: View {
             Divider()
             TagBarView(note: note)
             Divider()
+            if showFind {
+                FindBarView(
+                    query: $findQuery,
+                    matchIndex: $matchIndex,
+                    matchCount: matchCount,
+                    onNext: { stepMatch(by: 1) },
+                    onPrev: { stepMatch(by: -1) },
+                    onClose: { closeFindBar() }
+                )
+                Divider()
+            }
             if store.isPreview {
                 MarkdownPreview(text: text, note: note)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -40,9 +55,43 @@ struct EditorView: View {
             updated.body = newValue
             store.update(updated)
         }
+        .onChange(of: findQuery) { _, _ in
+            matchIndex = 0
+            runFind()
+        }
         .onDisappear {
             store.deleteEmptyNote(id: note.id)
         }
+        .background(findShortcutCapture)
+    }
+
+    // Invisible view that captures ⌘F without conflicting with the sidebar search
+    private var findShortcutCapture: some View {
+        Button("") { openFindBar() }
+            .keyboardShortcut("f", modifiers: .command)
+            .frame(width: 0, height: 0)
+            .opacity(0)
+    }
+
+    private func openFindBar() {
+        showFind = true
+    }
+
+    private func closeFindBar() {
+        showFind = false
+        findQuery = ""
+        matchCount = 0
+        MarkdownTextEditor.clearHighlights(in: textView)
+    }
+
+    private func runFind() {
+        matchCount = MarkdownTextEditor.findAndHighlight(in: textView, query: findQuery, matchIndex: matchIndex)
+    }
+
+    private func stepMatch(by delta: Int) {
+        guard matchCount > 0 else { return }
+        matchIndex = ((matchIndex + delta) % matchCount + matchCount) % matchCount
+        runFind()
     }
 
     private func insertAttachmentSyntax(_ filename: String) {
@@ -135,6 +184,49 @@ struct EditorView: View {
         }
         .frame(height: 36)
         .background(.bar)
+    }
+}
+
+struct FindBarView: View {
+    @Binding var query: String
+    @Binding var matchIndex: Int
+    let matchCount: Int
+    let onNext: () -> Void
+    let onPrev: () -> Void
+    let onClose: () -> Void
+
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+            TextField("Find in note…", text: $query)
+                .textFieldStyle(.plain)
+                .focused($focused)
+                .onSubmit { onNext() }
+                .frame(minWidth: 160)
+            if matchCount > 0 {
+                Text("\(matchIndex + 1)/\(matchCount)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            } else if !query.isEmpty {
+                Text("No results")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Button(action: onPrev) { Image(systemName: "chevron.up") }
+                .buttonStyle(.plain).help("Previous match")
+            Button(action: onNext) { Image(systemName: "chevron.down") }
+                .buttonStyle(.plain).help("Next match")
+            Button(action: onClose) { Image(systemName: "xmark") }
+                .buttonStyle(.plain).help("Close (Esc)")
+                .keyboardShortcut(.escape, modifiers: [])
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(.bar)
+        .onAppear { focused = true }
     }
 }
 

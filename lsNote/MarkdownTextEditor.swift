@@ -64,6 +64,54 @@ struct MarkdownTextEditor: NSViewRepresentable {
         }
     }
 
+    // MARK: - Find helpers
+
+    /// Highlights all occurrences of `query` and scrolls to the `matchIndex`-th one (0-based).
+    /// Returns the total number of matches.
+    @discardableResult
+    static func findAndHighlight(in textView: NSTextView?, query: String, matchIndex: Int) -> Int {
+        guard let tv = textView else { return 0 }
+        let layoutManager = tv.layoutManager!
+        let fullRange = NSRange(location: 0, length: (tv.string as NSString).length)
+
+        // Clear previous highlights
+        layoutManager.removeTemporaryAttribute(.backgroundColor, forCharacterRange: fullRange)
+
+        guard !query.isEmpty else { return 0 }
+
+        var ranges: [NSRange] = []
+        let nsString = tv.string as NSString
+        var searchRange = NSRange(location: 0, length: nsString.length)
+        while searchRange.location < nsString.length {
+            let found = nsString.range(of: query,
+                                       options: [.caseInsensitive],
+                                       range: searchRange)
+            guard found.location != NSNotFound else { break }
+            ranges.append(found)
+            searchRange = NSRange(location: found.location + found.length,
+                                  length: nsString.length - found.location - found.length)
+        }
+
+        for (i, r) in ranges.enumerated() {
+            let color: NSColor = i == matchIndex ? .systemOrange : NSColor.systemYellow.withAlphaComponent(0.5)
+            layoutManager.addTemporaryAttribute(.backgroundColor, value: color, forCharacterRange: r)
+        }
+
+        if !ranges.isEmpty {
+            let idx = ((matchIndex % ranges.count) + ranges.count) % ranges.count
+            tv.scrollRangeToVisible(ranges[idx])
+            tv.setSelectedRange(ranges[idx])
+        }
+
+        return ranges.count
+    }
+
+    static func clearHighlights(in textView: NSTextView?) {
+        guard let tv = textView else { return }
+        let fullRange = NSRange(location: 0, length: (tv.string as NSString).length)
+        tv.layoutManager?.removeTemporaryAttribute(.backgroundColor, forCharacterRange: fullRange)
+    }
+
     // MARK: - Coordinator
 
     class Coordinator: NSObject, NSTextViewDelegate {
