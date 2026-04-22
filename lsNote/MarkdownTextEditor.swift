@@ -54,6 +54,34 @@ struct MarkdownTextEditor: NSViewRepresentable {
         }
     }
 
+    static func insertCodeBlock(in textView: NSTextView?) {
+        guard let tv = textView else { return }
+        let range = tv.selectedRange()
+        let selected = (tv.string as NSString).substring(with: range)
+        let replacement = "```\n\(selected)\n```"
+        if tv.shouldChangeText(in: range, replacementString: replacement) {
+            tv.replaceCharacters(in: range, with: replacement)
+            tv.didChangeText()
+            if range.length == 0 {
+                tv.setSelectedRange(NSRange(location: range.location + 4, length: 0))
+            }
+        }
+    }
+
+    static func insertLink(in textView: NSTextView?) {
+        guard let tv = textView else { return }
+        let range = tv.selectedRange()
+        let selected = (tv.string as NSString).substring(with: range)
+        let replacement = "[\(selected)](url)"
+        if tv.shouldChangeText(in: range, replacementString: replacement) {
+            tv.replaceCharacters(in: range, with: replacement)
+            tv.didChangeText()
+            // Select "url" placeholder
+            let urlStart = range.location + 1 + selected.count + 2
+            tv.setSelectedRange(NSRange(location: urlStart, length: 3))
+        }
+    }
+
     static func insertTable(in textView: NSTextView?) {
         guard let tv = textView else { return }
         let table = "\n| Header 1 | Header 2 | Header 3 |\n| --- | --- | --- |\n| Cell | Cell | Cell |\n"

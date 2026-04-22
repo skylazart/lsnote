@@ -163,13 +163,14 @@ struct EditorView: View {
                 .keyboardShortcut("i", modifiers: .command)
 
                 Button {
-                    MarkdownTextEditor.insertTable(in: textView)
+                    MarkdownTextEditor.insertCodeBlock(in: textView)
                 } label: {
-                    Image(systemName: "tablecells")
+                    Image(systemName: "chevron.left.forwardslash.chevron.right")
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
-                .help("Insert Table")
+                .help("Code Block (⌘')")
+                .keyboardShortcut("'", modifiers: .command)
 
                 Button {
                     openFilePicker()
@@ -179,6 +180,25 @@ struct EditorView: View {
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
                 .help("Attach Image")
+
+                Button {
+                    MarkdownTextEditor.insertTable(in: textView)
+                } label: {
+                    Image(systemName: "tablecells")
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+                .help("Insert Table")
+
+                Button {
+                    MarkdownTextEditor.insertLink(in: textView)
+                } label: {
+                    Image(systemName: "link")
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+                .help("Insert Link (⌘L)")
+                .keyboardShortcut("l", modifiers: .command)
 
                 Divider().frame(height: 16).padding(.horizontal, 4)
             }
