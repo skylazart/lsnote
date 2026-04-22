@@ -2,11 +2,12 @@ import Foundation
 
 struct Note: Identifiable, Codable, Equatable {
     let id: UUID
-    var title: String   // date-based, e.g. "Wednesday, March 25 2026"
+    var title: String
     var body: String
     var tags: [String]
-    var attachments: [String]   // filenames stored via ImageStore
+    var attachments: [String]
     var createdAt: Date
+    var isLocked: Bool
 
     var isEmpty: Bool { body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
@@ -18,6 +19,7 @@ struct Note: Identifiable, Codable, Equatable {
         tags        = try c.decode([String].self, forKey: .tags)
         attachments = (try? c.decode([String].self, forKey: .attachments)) ?? []
         createdAt   = try c.decode(Date.self,   forKey: .createdAt)
+        isLocked    = (try? c.decode(Bool.self, forKey: .isLocked)) ?? false
     }
 
     init(date: Date = .now) {
@@ -26,6 +28,7 @@ struct Note: Identifiable, Codable, Equatable {
         self.body = ""
         self.tags = []
         self.attachments = []
+        self.isLocked = false
 
         let f = DateFormatter()
         f.dateFormat = "EEEE, MMMM d yyyy"

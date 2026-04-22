@@ -6,9 +6,12 @@ struct MarkdownPreview: NSViewRepresentable {
     let text: String
     var note: Note? = nil
 
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
     func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
         let view = WKWebView(frame: .zero, configuration: config)
+        view.navigationDelegate = context.coordinator
         view.setValue(false, forKey: "drawsBackground")
         return view
     }
@@ -217,6 +220,26 @@ struct MarkdownPreview: NSViewRepresentable {
         s.replacingOccurrences(of: "&", with: "&amp;")
          .replacingOccurrences(of: "<", with: "&lt;")
          .replacingOccurrences(of: ">", with: "&gt;")
+    }
+
+    class Coordinator: NSObject, WKNavigationDelegate {
+        func webView(_ webView: WKWebView,
+                     decidePolicyFor action: WKNavigationAction,
+                     decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+            guard action.navigationType == .linkActivated,
+                  let url = action.request.url else {
+                decisionHandler(.allow); return
+            }
+            decisionHandler(.cancel)
+            let alert = NSAlert()
+            alert.messageText = "Open External Link?"
+            alert.informativeText = url.absoluteString
+            alert.addButton(withTitle: "Open")
+            alert.addButton(withTitle: "Cancel")
+            if alert.runModal() == .alertFirstButtonReturn {
+                NSWorkspace.shared.open(url)
+            }
+        }
     }
 }
 

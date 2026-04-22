@@ -13,6 +13,8 @@ struct EditorView: View {
     @State private var matchIndex = 0
     @State private var matchCount = 0
 
+    private var isLocked: Bool { note.isLocked }
+
     var body: some View {
         VStack(spacing: 0) {
             toolbar
@@ -30,11 +32,22 @@ struct EditorView: View {
                 )
                 Divider()
             }
+            if isLocked {
+                HStack(spacing: 6) {
+                    Image(systemName: "lock.fill").font(.caption)
+                    Text("Locked for editing").font(.caption)
+                }
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 4)
+                .background(Color.yellow.opacity(0.15))
+                Divider()
+            }
             if store.isPreview {
                 MarkdownPreview(text: text, note: note)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                MarkdownTextEditor(text: $text) { tv in
+                MarkdownTextEditor(text: $text, isLocked: isLocked) { tv in
                     textView = tv
                 }
                 .padding(8)
@@ -141,6 +154,17 @@ struct EditorView: View {
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
                 .help("Find in Note (⌘F)")
+
+                Button {
+                    var updated = note
+                    updated.isLocked.toggle()
+                    store.update(updated)
+                } label: {
+                    Image(systemName: isLocked ? "lock.fill" : "lock.open")
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+                .help(isLocked ? "Unlock Editing" : "Lock Editing")
 
                 Button {
                     MarkdownTextEditor.wrapSelection(in: textView, with: "**")
