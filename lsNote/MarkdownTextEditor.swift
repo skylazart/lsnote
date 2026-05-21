@@ -3,6 +3,7 @@ import AppKit
 
 struct MarkdownTextEditor: NSViewRepresentable {
     @Binding var text: String
+    var isLocked: Bool = false
     var onTextViewReady: (NSTextView) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -27,6 +28,7 @@ struct MarkdownTextEditor: NSViewRepresentable {
             tv.string = text
             tv.setSelectedRange(sel)
         }
+        tv.isEditable = !isLocked
     }
 
     // MARK: - Formatting helpers
