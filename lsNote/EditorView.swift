@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 struct EditorView: View {
     @EnvironmentObject var store: NoteStore
+    @ObservedObject private var settings = AppSettings.shared
     let note: Note
 
     @State private var text: String = ""
@@ -47,7 +48,7 @@ struct EditorView: View {
                 MarkdownPreview(text: text, note: note)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                MarkdownTextEditor(text: $text, isLocked: isLocked) { tv in
+                MarkdownTextEditor(text: $text, isLocked: isLocked, font: settings.font) { tv in
                     textView = tv
                 }
                 .padding(8)

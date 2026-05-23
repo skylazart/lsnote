@@ -17,6 +17,8 @@
 		B010 /* TodoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A010 /* TodoView.swift */; };
 		B011 /* MarkdownTextEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A011 /* MarkdownTextEditor.swift */; };
 		B012 /* ImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A012 /* ImageStore.swift */; };
+		B013 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A013 /* AppSettings.swift */; };
+		B014 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A014 /* SettingsView.swift */; };
 		B008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A008 /* Assets.xcassets */; };
 		B009 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A009 /* AppIcon.icns */; };
 /* End PBXBuildFile section */
@@ -32,6 +34,8 @@
 		A010 /* TodoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoView.swift; sourceTree = "<group>"; };
 		A011 /* MarkdownTextEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTextEditor.swift; sourceTree = "<group>"; };
 		A012 /* ImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStore.swift; sourceTree = "<group>"; };
+		A013 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		A014 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A009 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		PROD /* lsNote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = lsNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -61,6 +65,8 @@
 				A010 /* TodoView.swift */,
 				A011 /* MarkdownTextEditor.swift */,
 				A012 /* ImageStore.swift */,
+				A013 /* AppSettings.swift */,
+				A014 /* SettingsView.swift */,
 				A008 /* Assets.xcassets */,
 				A009 /* AppIcon.icns */,
 			);
@@ -163,6 +169,8 @@
 				B010 /* TodoView.swift in Sources */,
 				B011 /* MarkdownTextEditor.swift in Sources */,
 				B012 /* ImageStore.swift in Sources */,
+				B013 /* AppSettings.swift in Sources */,
+				B014 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

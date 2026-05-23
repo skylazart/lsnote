@@ -26,6 +26,20 @@ struct lsNoteApp: App {
                 }
                 .keyboardShortcut("f", modifiers: [.command, .shift])
             }
+            CommandGroup(after: .toolbar) {
+                Button("Increase Font Size") {
+                    AppSettings.shared.increaseFontSize()
+                }
+                .keyboardShortcut("+", modifiers: .command)
+                Button("Decrease Font Size") {
+                    AppSettings.shared.decreaseFontSize()
+                }
+                .keyboardShortcut("-", modifiers: .command)
+            }
+        }
+
+        Settings {
+            SettingsView()
         }
     }
 }

@@ -4,6 +4,7 @@ import AppKit
 struct MarkdownTextEditor: NSViewRepresentable {
     @Binding var text: String
     var isLocked: Bool = false
+    var font: NSFont = AppSettings.shared.font
     var onTextViewReady: (NSTextView) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -13,7 +14,7 @@ struct MarkdownTextEditor: NSViewRepresentable {
         let tv = scrollView.documentView as! NSTextView
         tv.delegate = context.coordinator
         tv.isRichText = false
-        tv.font = .monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+        tv.font = font
         tv.isAutomaticQuoteSubstitutionEnabled = false
         tv.isAutomaticDashSubstitutionEnabled = false
         tv.allowsUndo = true
@@ -29,6 +30,7 @@ struct MarkdownTextEditor: NSViewRepresentable {
             tv.setSelectedRange(sel)
         }
         tv.isEditable = !isLocked
+        tv.font = font
     }
 
     // MARK: - Formatting helpers
