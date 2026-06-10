@@ -5,32 +5,56 @@ struct MarkdownTextEditor: NSViewRepresentable {
     @Binding var text: String
     var isLocked: Bool = false
     var font: NSFont = AppSettings.shared.font
+    var columnInsertAtLineEnd: Bool = false
+    var onMultiCursorStatus: (String?) -> Void = { _ in }
     var onTextViewReady: (NSTextView) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     func makeNSView(context: Context) -> NSScrollView {
-        let scrollView = NSTextView.scrollableTextView()
-        let tv = scrollView.documentView as! NSTextView
+        let textStorage = NSTextStorage()
+        let layoutManager = NSLayoutManager()
+        textStorage.addLayoutManager(layoutManager)
+        let textContainer = NSTextContainer(containerSize: NSSize(width: 0, height: CGFloat.greatestFiniteMagnitude))
+        textContainer.widthTracksTextView = true
+        layoutManager.addTextContainer(textContainer)
+
+        let tv = MultiCursorTextView(frame: .zero, textContainer: textContainer)
         tv.delegate = context.coordinator
         tv.isRichText = false
         tv.font = font
         tv.isAutomaticQuoteSubstitutionEnabled = false
         tv.isAutomaticDashSubstitutionEnabled = false
         tv.allowsUndo = true
+        tv.isVerticallyResizable = true
+        tv.isHorizontallyResizable = false
+        tv.autoresizingMask = [.width]
+        tv.minSize = NSSize.zero
+        tv.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+        tv.insertAtLineEndWhenShort = columnInsertAtLineEnd
+        tv.onStatusChange = onMultiCursorStatus
+
+        let scrollView = NSScrollView()
+        scrollView.documentView = tv
+        scrollView.hasVerticalScroller = true
+        scrollView.drawsBackground = true
         DispatchQueue.main.async { onTextViewReady(tv) }
         return scrollView
     }
 
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
-        let tv = scrollView.documentView as! NSTextView
+        let tv = scrollView.documentView as! MultiCursorTextView
         if tv.string != text {
+            tv.clearMultiCursors(keepCaret: false)
             let sel = tv.selectedRange()
             tv.string = text
-            tv.setSelectedRange(sel)
+            let length = (text as NSString).length
+            tv.setSelectedRange(NSRange(location: min(sel.location, length), length: 0))
         }
         tv.isEditable = !isLocked
         tv.font = font
+        tv.insertAtLineEndWhenShort = columnInsertAtLineEnd
+        tv.onStatusChange = onMultiCursorStatus
     }
 
     // MARK: - Formatting helpers

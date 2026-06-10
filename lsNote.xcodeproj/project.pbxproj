@@ -16,6 +16,7 @@
 		B007 /* MarkdownPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = A007 /* MarkdownPreview.swift */; };
 		B010 /* TodoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A010 /* TodoView.swift */; };
 		B011 /* MarkdownTextEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A011 /* MarkdownTextEditor.swift */; };
+		B015 /* MultiCursorTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A015 /* MultiCursorTextView.swift */; };
 		B012 /* ImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A012 /* ImageStore.swift */; };
 		B013 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A013 /* AppSettings.swift */; };
 		B014 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A014 /* SettingsView.swift */; };
@@ -33,6 +34,7 @@
 		A007 /* MarkdownPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownPreview.swift; sourceTree = "<group>"; };
 		A010 /* TodoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoView.swift; sourceTree = "<group>"; };
 		A011 /* MarkdownTextEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTextEditor.swift; sourceTree = "<group>"; };
+		A015 /* MultiCursorTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiCursorTextView.swift; sourceTree = "<group>"; };
 		A012 /* ImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStore.swift; sourceTree = "<group>"; };
 		A013 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		A014 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -64,6 +66,7 @@
 				A007 /* MarkdownPreview.swift */,
 				A010 /* TodoView.swift */,
 				A011 /* MarkdownTextEditor.swift */,
+				A015 /* MultiCursorTextView.swift */,
 				A012 /* ImageStore.swift */,
 				A013 /* AppSettings.swift */,
 				A014 /* SettingsView.swift */,
@@ -168,6 +171,7 @@
 				B007 /* MarkdownPreview.swift in Sources */,
 				B010 /* TodoView.swift in Sources */,
 				B011 /* MarkdownTextEditor.swift in Sources */,
+				B015 /* MultiCursorTextView.swift in Sources */,
 				B012 /* ImageStore.swift in Sources */,
 				B013 /* AppSettings.swift in Sources */,
 				B014 /* SettingsView.swift in Sources */,

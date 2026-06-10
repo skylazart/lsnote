@@ -20,7 +20,9 @@ lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridg
 
 **Layout root:** `ContentView` uses `NavigationSplitView` with three columns — sidebar nav (Notes/TODO selector), `SidebarView` or `TodoView`, and `EditorView`.
 
-**Text editing:** `MarkdownTextEditor` wraps `NSTextView`. All formatting helpers (bold, italic, table insert, find+highlight) are static methods on this type. The find bar highlights matches via `NSLayoutManager` temporary attributes (orange for current, yellow for others) and is invoked with Cmd+F from `EditorView`.
+**Text editing:** `MarkdownTextEditor` wraps `MultiCursorTextView` (an `NSTextView` subclass). All formatting helpers (bold, italic, table insert, find+highlight) are static methods on `MarkdownTextEditor`. The find bar highlights matches via `NSLayoutManager` temporary attributes (orange for current, yellow for others) and is invoked with Cmd+F from `EditorView`.
+
+**Multi-cursor:** `MultiCursorTextView` implements column editing (Alt+drag, Alt+Shift+↑/↓) and multi-match selection (⌘G next / ⇧⌘G previous / ⇧⌘L all occurrences; word-boundary matching when the seed selection was a double-click). Cursor state lives in its `cursors` array (NSTextView has no multi-cursor API); all simultaneous edits go through one `shouldChangeText(inRanges:replacementStrings:)` call so each operation is a single undo step. Escape, a plain click/selection change, or any external text mutation exits multi-cursor mode. `EditorView` shows a status badge ("3 of 7 matches selected") via the `onMultiCursorStatus` callback. The short-line column behavior (skip vs. insert at end of line) is configurable via `AppSettings.columnInsertAtLineEnd`.
 
 **Markdown preview:** `MarkdownPreview` wraps `WKWebView` with a fully custom GFM renderer written in Swift — no Markdown libraries. Attachment images use the syntax `![caption](attachment:uuid.png [WxH])` and are embedded as base64 data URIs to bypass WKWebView's file:// restrictions.
 

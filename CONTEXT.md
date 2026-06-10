@@ -50,7 +50,12 @@ lsNote/
 | ⇧⌘F | Focus sidebar search field |
 | ⌘B | Bold selection |
 | ⌘I | Italic selection |
-| Esc | Close find bar |
+| Esc | Close find bar / exit multi-cursor mode |
+| Alt+Drag | Column (rectangular) selection |
+| Alt+Shift+↑/↓ | Extend column selection up/down |
+| ⌘G | Add next occurrence of selection to multi-selection |
+| ⇧⌘G | Add previous occurrence to multi-selection |
+| ⇧⌘L | Select all occurrences of selection |
 
 ### In-Note Find Bar (⌘F)
 - Appears between the tag bar and the editor.
@@ -59,6 +64,12 @@ lsNote/
 - Current match highlighted in orange; others in yellow.
 - Implemented via `NSLayoutManager` temporary attributes.
 - Closing clears all highlights.
+
+### Multi-Cursor Editing (`MultiCursorTextView`)
+- **Column mode:** Alt+drag a rectangle (or Alt+Shift+↑/↓ from the caret) to place a cursor at the same column on every selected line. Typing, Backspace/Delete, and paste apply to all lines at once — e.g. type `- ` at column 0 to prefix every line. Lines shorter than the column are skipped by default (Settings can switch this to insert at end of line).
+- **Multi-match mode:** select a word, then ⌘G repeatedly adds the next occurrences (⇧⌘G previous, ⇧⌘L all). Double-click seeds a whole-word match; drag-selection matches partial words. Matching is case-sensitive. Unselected occurrences get a subtle yellow highlight; a badge in the editor's bottom-right shows "X of Y matches selected".
+- Copying a column selection puts one entry per line on the pasteboard; pasting distributes entries back one-per-line (column block paste also works from a single caret).
+- Every simultaneous edit is one undo step. Escape, clicking, moving the caret, or any external edit (toolbar formatting, undo, note switch) returns to a single cursor. Column and match modes are mutually exclusive — starting one cancels the other.
 
 ### TODO View
 - Aggregates `- [ ] task` / `- [x] task` lines from all notes tagged `#todo`.

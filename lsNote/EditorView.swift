@@ -13,6 +13,7 @@ struct EditorView: View {
     @State private var findQuery = ""
     @State private var matchIndex = 0
     @State private var matchCount = 0
+    @State private var multiCursorStatus: String? = nil
 
     private var isLocked: Bool { note.isLocked }
 
@@ -48,10 +49,26 @@ struct EditorView: View {
                 MarkdownPreview(text: text, note: note)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                MarkdownTextEditor(text: $text, isLocked: isLocked, font: settings.font) { tv in
+                MarkdownTextEditor(text: $text,
+                                   isLocked: isLocked,
+                                   font: settings.font,
+                                   columnInsertAtLineEnd: settings.columnInsertAtLineEnd,
+                                   onMultiCursorStatus: { multiCursorStatus = $0 }) { tv in
                     textView = tv
                 }
                 .padding(8)
+                .overlay(alignment: .bottomTrailing) {
+                    if let status = multiCursorStatus {
+                        Text(status)
+                            .font(.caption)
+                            .monospacedDigit()
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(.regularMaterial, in: Capsule())
+                            .padding(12)
+                            .allowsHitTesting(false)
+                    }
+                }
             }
             if !note.attachments.isEmpty {
                 Divider()

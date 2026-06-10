@@ -10,6 +10,11 @@ final class AppSettings: ObservableObject {
     @AppStorage("editorFontSize") var fontSize: Double = Double(NSFont.systemFontSize) {
         didSet { objectWillChange.send() }
     }
+    /// Column editing: when a line is shorter than the target column,
+    /// insert at the end of that line instead of skipping it.
+    @AppStorage("columnInsertAtLineEnd") var columnInsertAtLineEnd: Bool = false {
+        didSet { objectWillChange.send() }
+    }
 
     var font: NSFont {
         NSFont(name: fontName, size: fontSize) ?? .monospacedSystemFont(ofSize: fontSize, weight: .regular)

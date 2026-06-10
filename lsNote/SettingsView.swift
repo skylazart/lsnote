@@ -27,8 +27,10 @@ struct SettingsView: View {
             Text("The quick brown fox jumps over the lazy dog")
                 .font(.init(settings.font))
                 .padding(.top, 8)
+            Toggle("Column editing on short lines inserts at end of line", isOn: $settings.columnInsertAtLineEnd)
+                .help("When a line is shorter than the selected column, insert there at the end of the line instead of skipping the line.")
         }
         .formStyle(.grouped)
-        .frame(width: 400, height: 200)
+        .frame(width: 400, height: 240)
     }
 }
