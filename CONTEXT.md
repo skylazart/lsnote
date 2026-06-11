@@ -57,6 +57,11 @@ lsNote/
 | ⇧⌘G | Add previous occurrence to multi-selection |
 | ⇧⌘L | Select all occurrences of selection |
 
+### Tag Autocomplete
+- Typing in the tag bar's "Add tag…" field shows a dropdown of existing tags (from all notes) matching the input — prefix matches first, then substring matches; tags already on the note are excluded.
+- ↑/↓ move the highlight, Return commits the highlighted suggestion (or the typed text if none is highlighted), Tab accepts the highlighted/first suggestion, Esc dismisses the dropdown. Clicking a suggestion also adds it.
+- Input is normalized (lowercased, spaces → hyphens) before matching, same as committed tags.
+
 ### In-Note Find Bar (⌘F)
 - Appears between the tag bar and the editor.
 - Case-insensitive search with match counter (`n/total`).

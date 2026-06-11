@@ -22,6 +22,7 @@ struct EditorView: View {
             toolbar
             Divider()
             TagBarView(note: note)
+                .zIndex(1) // keep the tag autocomplete dropdown above the editor
             Divider()
             if showFind {
                 FindBarView(
@@ -307,6 +308,27 @@ struct TagBarView: View {
 
     @State private var newTag = ""
     @FocusState private var inputFocused: Bool
+    @State private var highlightedIndex: Int? = nil
+    @State private var suggestionsDismissed = false
+    @State private var fieldFrame: CGRect = .zero
+    @State private var barWidth: CGFloat = 0
+
+    private static let dropdownWidth: CGFloat = 170
+
+    // Input normalized the same way commitTag stores it, so matching is consistent
+    private var normalizedInput: String {
+        newTag.trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "-")
+    }
+
+    private var suggestions: [String] {
+        guard !normalizedInput.isEmpty, !suggestionsDismissed else { return [] }
+        let candidates = store.allTags.filter { !note.tags.contains($0) }
+        let prefixed = candidates.filter { $0.hasPrefix(normalizedInput) }
+        let contained = candidates.filter { !$0.hasPrefix(normalizedInput) && $0.contains(normalizedInput) }
+        return Array((prefixed + contained).prefix(8))
+    }
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -331,31 +353,128 @@ struct TagBarView: View {
                     .font(.caption)
                     .frame(width: 80)
                     .focused($inputFocused)
-                    .onSubmit { commitTag() }
+                    .onSubmit { commitSubmit() }
                     .textFieldStyle(.plain)
+                    .background(GeometryReader { geo in
+                        Color.clear.preference(key: TagFieldFrameKey.self,
+                                               value: geo.frame(in: .named("tagBar")))
+                    })
+                    .onKeyPress(.downArrow) { moveHighlight(1) }
+                    .onKeyPress(.upArrow) { moveHighlight(-1) }
+                    .onKeyPress(.tab) { acceptSuggestion() }
+                    .onKeyPress(.escape) { dismissSuggestions() }
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
         }
+        .coordinateSpace(name: "tagBar")
+        .onPreferenceChange(TagFieldFrameKey.self) { fieldFrame = $0 }
         .frame(height: 30)
         .background(.bar)
+        .background(GeometryReader { geo in
+            Color.clear
+                .onAppear { barWidth = geo.size.width }
+                .onChange(of: geo.size.width) { _, width in barWidth = width }
+        })
+        .overlay(alignment: .topLeading) {
+            if inputFocused, !suggestions.isEmpty {
+                suggestionList
+                    .offset(x: dropdownX, y: 30)
+            }
+        }
+        .onChange(of: newTag) { _, _ in
+            highlightedIndex = nil
+            suggestionsDismissed = false
+        }
     }
 
-    private func commitTag() {
-        let tag = newTag.trimmingCharacters(in: .whitespacesAndNewlines)
-            .lowercased()
-            .replacingOccurrences(of: " ", with: "-")
-        guard !tag.isEmpty, !note.tags.contains(tag) else { newTag = ""; return }
+    private var dropdownX: CGFloat {
+        max(0, min(fieldFrame.minX, barWidth - Self.dropdownWidth - 10))
+    }
+
+    private var suggestionList: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(suggestions.enumerated()), id: \.element) { index, tag in
+                Button {
+                    commit(tag)
+                } label: {
+                    Text("#\(tag)")
+                        .font(.caption)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .background(index == highlightedIndex ? Color.accentColor.opacity(0.25) : Color.clear)
+                .onHover { hovering in
+                    if hovering { highlightedIndex = index }
+                }
+            }
+        }
+        .padding(.vertical, 4)
+        .frame(width: Self.dropdownWidth)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6))
+        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.secondary.opacity(0.3)))
+        .shadow(color: .black.opacity(0.25), radius: 5, y: 2)
+    }
+
+    private func moveHighlight(_ delta: Int) -> KeyPress.Result {
+        guard !suggestions.isEmpty else { return .ignored }
+        let count = suggestions.count
+        if let current = highlightedIndex {
+            highlightedIndex = (current + delta + count) % count
+        } else {
+            highlightedIndex = delta > 0 ? 0 : count - 1
+        }
+        return .handled
+    }
+
+    private func acceptSuggestion() -> KeyPress.Result {
+        guard !suggestions.isEmpty else { return .ignored }
+        commit(suggestions[highlightedIndex ?? 0])
+        return .handled
+    }
+
+    private func dismissSuggestions() -> KeyPress.Result {
+        guard !suggestions.isEmpty else { return .ignored }
+        suggestionsDismissed = true
+        highlightedIndex = nil
+        return .handled
+    }
+
+    private func commitSubmit() {
+        if let index = highlightedIndex, index < suggestions.count {
+            commit(suggestions[index])
+        } else {
+            commit(normalizedInput)
+        }
+    }
+
+    private func commit(_ tag: String) {
+        defer {
+            newTag = ""
+            highlightedIndex = nil
+            suggestionsDismissed = false
+        }
+        guard !tag.isEmpty, !note.tags.contains(tag) else { return }
         var updated = note
         updated.tags.append(tag)
         store.update(updated)
-        newTag = ""
     }
 
     private func removeTag(_ tag: String) {
         var updated = note
         updated.tags.removeAll { $0 == tag }
         store.update(updated)
+    }
+}
+
+private struct TagFieldFrameKey: PreferenceKey {
+    static var defaultValue: CGRect = .zero
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        value = nextValue()
     }
 }
 
