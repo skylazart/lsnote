@@ -1,7 +1,33 @@
 import SwiftUI
+import AppKit
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    weak var store: NoteStore? {
+        didSet {
+            guard let store, !pendingURLs.isEmpty else { return }
+            let urls = pendingURLs
+            pendingURLs = []
+            Task { @MainActor in
+                for url in urls { store.importNote(from: url) }
+            }
+        }
+    }
+    private var pendingURLs: [URL] = []
+
+    func application(_ application: NSApplication, open urls: [URL]) {
+        guard let store else {
+            pendingURLs.append(contentsOf: urls)
+            return
+        }
+        Task { @MainActor in
+            for url in urls { store.importNote(from: url) }
+        }
+    }
+}
 
 @main
 struct lsNoteApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var store = NoteStore()
 
     init() {
@@ -12,6 +38,7 @@ struct lsNoteApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(store)
+                .onAppear { appDelegate.store = store }
         }
         .commands {
             CommandGroup(replacing: .newItem) {

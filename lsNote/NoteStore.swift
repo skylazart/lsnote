@@ -44,6 +44,16 @@ class NoteStore: ObservableObject {
         save()
     }
 
+    func importNote(from url: URL) {
+        guard let content = try? String(contentsOf: url, encoding: .utf8) else { return }
+        var note = Note()
+        note.title = url.deletingPathExtension().lastPathComponent
+        note.body = content
+        notes.insert(note, at: 0)
+        selectedID = note.id
+        save()
+    }
+
     func delete(id: UUID) {
         ImageStore.deleteAll(noteID: id)
         notes.removeAll { $0.id == id }
