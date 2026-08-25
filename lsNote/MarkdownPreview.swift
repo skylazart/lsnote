@@ -7,6 +7,7 @@ struct MarkdownPreview: NSViewRepresentable {
     var note: Note? = nil
     var fontFamily: String = "-apple-system"
     var fontSize: Double = 14
+    var customCSS: String? = nil
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -67,6 +68,7 @@ struct MarkdownPreview: NSViewRepresentable {
             figcaption { color: #888; }
           }
         </style>
+        \(customCSS.map { "<style>\n\($0)\n</style>" } ?? "")
         </head>
         <body>\(renderMarkdown(markdown, noteID: noteID))</body>
         </html>

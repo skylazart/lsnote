@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @ObservedObject private var settings = AppSettings.shared
@@ -29,8 +30,30 @@ struct SettingsView: View {
                 .padding(.top, 8)
             Toggle("Column editing on short lines inserts at end of line", isOn: $settings.columnInsertAtLineEnd)
                 .help("When a line is shorter than the selected column, insert there at the end of the line instead of skipping the line.")
+            Section("Preview") {
+                HStack {
+                    Text(settings.customCSSPath.isEmpty ? "No custom CSS" : settings.customCSSPath)
+                        .foregroundStyle(settings.customCSSPath.isEmpty ? .secondary : .primary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Spacer()
+                    Button("Choose…", action: chooseCustomCSS)
+                    if !settings.customCSSPath.isEmpty {
+                        Button("Clear") { settings.customCSSPath = "" }
+                    }
+                }
+            }
         }
         .formStyle(.grouped)
-        .frame(width: 400, height: 240)
+        .frame(width: 400, height: 300)
+    }
+
+    private func chooseCustomCSS() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [UTType(filenameExtension: "css")].compactMap { $0 }
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        settings.customCSSPath = url.path
     }
 }

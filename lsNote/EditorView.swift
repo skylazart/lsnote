@@ -48,7 +48,8 @@ struct EditorView: View {
             }
             if store.isPreview {
                 MarkdownPreview(text: text, note: note,
-                                 fontFamily: settings.cssFontFamily, fontSize: settings.fontSize)
+                                 fontFamily: settings.cssFontFamily, fontSize: settings.fontSize,
+                                 customCSS: settings.customCSS)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 MarkdownTextEditor(text: $text,
