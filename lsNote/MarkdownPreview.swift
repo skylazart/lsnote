@@ -5,6 +5,8 @@ import WebKit
 struct MarkdownPreview: NSViewRepresentable {
     let text: String
     var note: Note? = nil
+    var fontFamily: String = "-apple-system"
+    var fontSize: Double = 14
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -24,17 +26,18 @@ struct MarkdownPreview: NSViewRepresentable {
     // MARK: - Minimal GFM renderer
 
     private func html(for markdown: String, attachments: [String], noteID: UUID?) -> String {
+        let codeFontSize = max(fontSize - 1, 8)
         return """
         <!DOCTYPE html>
         <html>
         <head>
         <meta charset="utf-8">
         <style>
-          body { font-family: -apple-system, sans-serif; font-size: 14px;
+          body { font-family: "\(fontFamily)", -apple-system, sans-serif; font-size: \(fontSize)px;
                  padding: 16px; color: #1c1c1e; background: transparent; }
           pre  { background: #f5f5f5; border-radius: 0 0 6px 6px; padding: 12px;
                  overflow-x: auto; margin: 0; }
-          code { font-family: "SF Mono", Menlo, monospace; font-size: 13px; }
+          code { font-family: "SF Mono", Menlo, monospace; font-size: \(codeFontSize)px; }
           p > code { background: #f0f0f0; padding: 2px 4px; border-radius: 4px; }
           blockquote { border-left: 3px solid #ccc; margin: 0; padding-left: 12px;
                        color: #555; }
@@ -43,7 +46,7 @@ struct MarkdownPreview: NSViewRepresentable {
           th, td { border: 1px solid #ddd; padding: 6px 10px; }
           th { background: #f5f5f5; }
           details { border: 1px solid #ddd; border-radius: 6px; margin: 8px 0; }
-          summary { font-family: "SF Mono", Menlo, monospace; font-size: 12px;
+          summary { font-family: "SF Mono", Menlo, monospace; font-size: \(max(codeFontSize - 1, 8))px;
                     padding: 6px 10px; cursor: pointer; user-select: none;
                     background: #ececec; border-radius: 6px; list-style: none; }
           details[open] summary { border-radius: 6px 6px 0 0; }

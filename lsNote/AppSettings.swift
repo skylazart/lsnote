@@ -20,6 +20,12 @@ final class AppSettings: ObservableObject {
         NSFont(name: fontName, size: fontSize) ?? .monospacedSystemFont(ofSize: fontSize, weight: .regular)
     }
 
+    /// CSS-usable family name (e.g. "Menlo" rather than the PostScript name "Menlo-Regular"),
+    /// for use in the Markdown preview's WKWebView, which can't resolve PostScript names reliably.
+    var cssFontFamily: String {
+        font.familyName ?? fontName
+    }
+
     func increaseFontSize() { fontSize = min(fontSize + 1, 72) }
     func decreaseFontSize() { fontSize = max(fontSize - 1, 8) }
 }
