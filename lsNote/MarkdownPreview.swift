@@ -57,6 +57,7 @@ struct MarkdownPreview: NSViewRepresentable {
           figure { margin: 12px 0; }
           figure img { display: block; border-radius: 6px; }
           figcaption { font-size: 12px; color: #888; margin-top: 4px; }
+          .math { font-family: "Times New Roman", Cambria, Georgia, serif; font-style: italic; }
           @media (prefers-color-scheme: dark) {
             body { color: #f2f2f7; }
             pre, p > code { background: #2c2c2e; }
@@ -165,9 +166,49 @@ struct MarkdownPreview: NSViewRepresentable {
         return html
     }
 
+    // LaTeX-style command -> Unicode symbol, used inside $...$ math spans.
+    private static let mathSymbols: [String: String] = [
+        // Greek letters
+        "alpha": "α", "beta": "β", "gamma": "γ", "rho": "ρ",
+        // Binary operators
+        "times": "×", "div": "÷", "pm": "±", "mp": "∓",
+        // Relation operators
+        "leq": "≤", "geq": "≥", "equiv": "≡", "sim": "∼", "simeq": "≃", "approx": "≈", "propto": "∝",
+        // Arrow symbols
+        "leftarrow": "←", "rightarrow": "→", "leftrightarrow": "↔",
+        "leftharpoonup": "↼", "leftharpoondown": "↽", "rightharpoonup": "⇀", "rightharpoondown": "⇁",
+        // Other symbols
+        "infty": "∞", "pi": "π", "sum": "∑", "prod": "∏", "coprod": "∐", "int": "∫", "oint": "∮",
+        "cos": "cos", "ln": "ln",
+    ]
+
+    private func renderMathCommands(_ s: String) -> String {
+        guard let regex = try? NSRegularExpression(pattern: #"\\([a-zA-Z]+)"#) else { return s }
+        var t = s
+        let ns = t as NSString
+        let matches = regex.matches(in: t, range: NSRange(t.startIndex..., in: t))
+        for match in matches.reversed() {
+            let name = ns.substring(with: match.range(at: 1))
+            guard let symbol = Self.mathSymbols[name], let range = Range(match.range, in: t) else { continue }
+            t.replaceSubrange(range, with: symbol)
+        }
+        return t
+    }
+
     // Inline formatting
     private func inline(_ s: String, noteID: UUID?) -> String {
         var t = s
+        // Inline math: $\command$
+        if let regex = try? NSRegularExpression(pattern: #"\$(?!\s)([^\$\n]+?)(?<!\s)\$(?!\d)"#) {
+            let ns = t as NSString
+            let matches = regex.matches(in: t, range: NSRange(t.startIndex..., in: t))
+            for match in matches.reversed() {
+                let content = ns.substring(with: match.range(at: 1))
+                let rendered = renderMathCommands(content)
+                guard let range = Range(match.range, in: t) else { continue }
+                t.replaceSubrange(range, with: "<span class=\"math\">\(rendered)</span>")
+            }
+        }
         // Attachment images: ![title](attachment:filename.png 400x300)
         // dimensions optional: 400x300, 400x, x300, or omitted
         if let noteID {

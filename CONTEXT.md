@@ -85,7 +85,7 @@ lsNote/
 When the editor disappears, `NoteStore.deleteEmptyNote` removes the note if its body is blank (also deletes any attachments).
 
 ### Markdown Preview
-Custom renderer (no external dependencies). Supports: headings, bold/italic/strikethrough, inline code, fenced code blocks (collapsible `<details>`), blockquotes, unordered/ordered lists, GFM tables, horizontal rules, links, standard images, and attachment images (`![title](attachment:filename.png [WxH])`).
+Custom renderer (no external dependencies). Supports: headings, bold/italic/strikethrough, inline code, fenced code blocks (collapsible `<details>`), blockquotes, unordered/ordered lists, GFM tables, horizontal rules, links, standard images, attachment images (`![title](attachment:filename.png [WxH])`), and inline math (`$\command$` — Greek letters, binary/relation operators, arrows, and other common symbols mapped to Unicode; see `mathSymbols` in `MarkdownPreview.swift`).
 
 ## Attachment Images
 - Syntax in editor: `![caption](attachment:uuid.png)` or `![caption](attachment:uuid.png 400x300)`
