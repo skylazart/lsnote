@@ -27,6 +27,9 @@
 		C002 /* TagIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = A017 /* TagIndex.swift */; };
 		C003 /* TestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D001 /* TestSupport.swift */; };
 		C004 /* TagIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D002 /* TagIndexTests.swift */; };
+		B017 /* SearchQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A018 /* SearchQuery.swift */; };
+		C005 /* SearchQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A018 /* SearchQuery.swift */; };
+		C006 /* SearchQueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D003 /* SearchQueryTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +54,8 @@
 		A017 /* TagIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagIndex.swift; sourceTree = "<group>"; };
 		D001 /* TestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSupport.swift; sourceTree = "<group>"; };
 		D002 /* TagIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagIndexTests.swift; sourceTree = "<group>"; };
+		A018 /* SearchQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchQuery.swift; sourceTree = "<group>"; };
+		D003 /* SearchQueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchQueryTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +114,7 @@
 				A009 /* AppIcon.icns */,
 				A016 /* Info.plist */,
 				A017 /* TagIndex.swift */,
+				A018 /* SearchQuery.swift */,
 			);
 			path = lsNote;
 			sourceTree = "<group>";
@@ -127,6 +133,7 @@
 			children = (
 				D001 /* TestSupport.swift */,
 				D002 /* TagIndexTests.swift */,
+				D003 /* SearchQueryTests.swift */,
 			);
 			path = lsNoteTests;
 			sourceTree = "<group>";
@@ -245,6 +252,7 @@
 				B013 /* AppSettings.swift in Sources */,
 				B014 /* SettingsView.swift in Sources */,
 				B016 /* TagIndex.swift in Sources */,
+				B017 /* SearchQuery.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,6 +264,8 @@
 				C002 /* TagIndex.swift in Sources */,
 				C003 /* TestSupport.swift in Sources */,
 				C004 /* TagIndexTests.swift in Sources */,
+				C005 /* SearchQuery.swift in Sources */,
+				C006 /* SearchQueryTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
