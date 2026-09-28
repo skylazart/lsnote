@@ -30,6 +30,11 @@
 		B017 /* SearchQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A018 /* SearchQuery.swift */; };
 		C005 /* SearchQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A018 /* SearchQuery.swift */; };
 		C006 /* SearchQueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D003 /* SearchQueryTests.swift */; };
+		B018 /* TagColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A019 /* TagColor.swift */; };
+		B019 /* TagMetadataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A020 /* TagMetadataStore.swift */; };
+		C007 /* TagColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A019 /* TagColor.swift */; };
+		C008 /* TagMetadataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A020 /* TagMetadataStore.swift */; };
+		C009 /* TagMetadataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D004 /* TagMetadataStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +61,9 @@
 		D002 /* TagIndexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagIndexTests.swift; sourceTree = "<group>"; };
 		A018 /* SearchQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchQuery.swift; sourceTree = "<group>"; };
 		D003 /* SearchQueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchQueryTests.swift; sourceTree = "<group>"; };
+		A019 /* TagColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagColor.swift; sourceTree = "<group>"; };
+		A020 /* TagMetadataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagMetadataStore.swift; sourceTree = "<group>"; };
+		D004 /* TagMetadataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagMetadataStoreTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +123,8 @@
 				A016 /* Info.plist */,
 				A017 /* TagIndex.swift */,
 				A018 /* SearchQuery.swift */,
+				A019 /* TagColor.swift */,
+				A020 /* TagMetadataStore.swift */,
 			);
 			path = lsNote;
 			sourceTree = "<group>";
@@ -134,6 +144,7 @@
 				D001 /* TestSupport.swift */,
 				D002 /* TagIndexTests.swift */,
 				D003 /* SearchQueryTests.swift */,
+				D004 /* TagMetadataStoreTests.swift */,
 			);
 			path = lsNoteTests;
 			sourceTree = "<group>";
@@ -253,6 +264,8 @@
 				B014 /* SettingsView.swift in Sources */,
 				B016 /* TagIndex.swift in Sources */,
 				B017 /* SearchQuery.swift in Sources */,
+				B018 /* TagColor.swift in Sources */,
+				B019 /* TagMetadataStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,6 +279,9 @@
 				C004 /* TagIndexTests.swift in Sources */,
 				C005 /* SearchQuery.swift in Sources */,
 				C006 /* SearchQueryTests.swift in Sources */,
+				C007 /* TagColor.swift in Sources */,
+				C008 /* TagMetadataStore.swift in Sources */,
+				C009 /* TagMetadataStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
