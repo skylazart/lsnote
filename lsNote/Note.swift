@@ -7,6 +7,8 @@ struct Note: Identifiable, Codable, Equatable {
     var tags: [String]
     var attachments: [String]
     var createdAt: Date
+    /// Last content change (title, body or tags). Older notes lack the key and fall back to `createdAt`.
+    var modifiedAt: Date
     var isLocked: Bool
 
     var isEmpty: Bool { body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
@@ -19,12 +21,14 @@ struct Note: Identifiable, Codable, Equatable {
         tags        = try c.decode([String].self, forKey: .tags)
         attachments = (try? c.decode([String].self, forKey: .attachments)) ?? []
         createdAt   = try c.decode(Date.self,   forKey: .createdAt)
+        modifiedAt  = (try? c.decode(Date.self, forKey: .modifiedAt)) ?? createdAt
         isLocked    = (try? c.decode(Bool.self, forKey: .isLocked)) ?? false
     }
 
     init(date: Date = .now) {
         self.id = UUID()
         self.createdAt = date
+        self.modifiedAt = date
         self.body = ""
         self.tags = []
         self.attachments = []

@@ -19,9 +19,23 @@ A minimal, privacy-focused note-taking app for macOS. Notes are written in Markd
 - Links open in your external browser, with confirmation
 
 ### Organization
-- Tag-based organization with tag filter chips in the sidebar
+- **Tag-aware search (⇧⌘F)** — the sidebar search combines tags and text; all parts must match:
+
+  | Input | Meaning |
+  |---|---|
+  | `#ocs` | tagged `ocs` (or any tag below it, e.g. `ocs/diameter`) |
+  | `-#todo` | not tagged `todo` (or anything below it) |
+  | `#ocs\|#pulse` | tagged `ocs` or `pulse` |
+  | `quota` | title or body contains the word |
+  | `"rating group"` | title or body contains the exact phrase |
+
+  Example: `#surf -#todo quota`. Tags turn into removable chips (excluded tags are struck through). Typing `#` or `-#` suggests existing tags with their note counts, matching the start of the tag or of any path segment (`diam` finds `ocs/diameter`) and then looser matches. Text search matches titles and bodies only; use `#` to search by tag
+- **Sidebar tag list** — a Tags section under Notes and TODO lists each tag with its color and note count. Pinned tags come first, in your order (drag to reorder). The rest are sorted by frequency, recent use, or name (sort button in the section header); the top 10 are shown, with **Show all** for the rest. Click a tag to add it to the search, click again to remove it. Right-click to pin/unpin, set a color, or exclude the tag
+- **Faceted narrowing** — while a search is active, the tag list shows only tags present in the results, with counts for those results, so each click narrows further. **Clear filter** resets the search
+- **Hierarchical tags** — use `/` to nest tags (`ocs/diameter`, `ocs/diameter/ccr`). Parents appear automatically and can be expanded in the sidebar. A parent's count is the number of distinct notes below it. `#ocs` includes everything under `ocs`; `-#ocs` excludes it all
+- **Tag colors** — 8 colors that work in light and dark mode. A color set on a parent applies to its children unless they have their own. Colors show in the sidebar, search chips, note list, and note header
+- Clicking a tag in the note list or in a note's header filters by that tag, keeping any search text
 - TODO view — aggregates `- [ ]` / `- [x]` items across all notes tagged `#todo`; check items off without leaving the list, or jump to the source note
-- Full-text search across titles, bodies, and tags (⇧⌘F)
 - In-note find bar (⌘F) with match highlighting and prev/next navigation
 
 ### Images
@@ -44,6 +58,12 @@ A minimal, privacy-focused note-taking app for macOS. Notes are written in Markd
 
 Or open `lsNote.xcodeproj` in Xcode and run.
 
+Run the unit tests (tag index, search query parser, tag metadata store):
+
+```bash
+./build.sh test
+```
+
 ## Keyboard Shortcuts
 
 | Shortcut | Action |
@@ -63,6 +83,17 @@ Or open `lsNote.xcodeproj` in Xcode and run.
 | ⇧⌘L | Select all occurrences |
 | Esc | Close find bar / exit multi-cursor mode |
 
+### Sidebar search
+
+| Key | Action |
+|---|---|
+| `#` / `-#` | Suggest tags to include / exclude |
+| ↑ / ↓ | Move through suggestions |
+| Return / Tab | Accept the suggestion as a chip |
+| Space | Turn a typed `#tag` into a chip |
+| Backspace (empty field) | Remove the last chip |
+| Esc | Close suggestions, or clear the search |
+
 ## Data Storage
 
 All data is stored locally — no cloud sync, no telemetry.
@@ -71,3 +102,4 @@ All data is stored locally — no cloud sync, no telemetry.
 |---|---|
 | Notes | `~/Library/Application Support/lsNote/notes.json` |
 | Attachments | `~/Library/Application Support/lsNote/attachments/<noteID>/` |
+| Tag pins, colors, expanded groups | `~/Library/Application Support/lsNote/tags.json` |

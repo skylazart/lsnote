@@ -21,6 +21,15 @@ final class AppSettings: ObservableObject {
         didSet { objectWillChange.send() }
     }
 
+    /// Ordering of unpinned tags in the sidebar tag list.
+    @AppStorage("tagSortMode") var tagSortMode: TagSortMode = .frequency {
+        didSet { objectWillChange.send() }
+    }
+    /// Sidebar tag list shows every top-level tag instead of the top 10.
+    @AppStorage("tagListShowAll") var tagListShowAll: Bool = false {
+        didSet { objectWillChange.send() }
+    }
+
     var font: NSFont {
         NSFont(name: fontName, size: fontSize) ?? .monospacedSystemFont(ofSize: fontSize, weight: .regular)
     }

@@ -29,6 +29,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 struct lsNoteApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var store = NoteStore()
+    @StateObject private var tagMetadata = TagMetadataStore()
 
     init() {
         UserDefaults.standard.set(0.3, forKey: "NSInitialToolTipDelay")
@@ -38,6 +39,7 @@ struct lsNoteApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(store)
+                .environmentObject(tagMetadata)
                 .onAppear { appDelegate.store = store }
         }
         .commands {

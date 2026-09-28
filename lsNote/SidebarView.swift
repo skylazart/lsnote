@@ -2,71 +2,21 @@ import SwiftUI
 
 struct SidebarView: View {
     @EnvironmentObject var store: NoteStore
-    @State private var query = ""
-    @State private var selectedTag: String? = nil
-    @FocusState private var searchFocused: Bool
-
-    private var filtered: [Note] {
-        store.notes.filter { note in
-            let matchesTag = selectedTag == nil || note.tags.contains(selectedTag!)
-            guard matchesTag else { return false }
-            guard !query.isEmpty else { return true }
-            let q = query.lowercased()
-            return note.title.lowercased().contains(q)
-                || note.body.lowercased().contains(q)
-                || note.tags.contains(where: { $0.lowercased().contains(q) })
-        }
-    }
 
     var body: some View {
+        let notes = store.filteredNotes
         VStack(spacing: 0) {
-            // Search field
-            HStack(spacing: 6) {
-                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("Search", text: $query)
-                    .textFieldStyle(.plain)
-                    .focused($searchFocused)
-                if !query.isEmpty {
-                    Button { query = "" } label: {
-                        Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(7)
-            .background(Color(nsColor: .controlBackgroundColor))
+            QueryField()
 
             Divider()
 
             List(selection: $store.selectedID) {
-                if !store.allTags.isEmpty {
-                    Section("Tags") {
-                        FlowLayout(spacing: 6) {
-                            ForEach(store.allTags, id: \.self) { tag in
-                                Text("#\(tag)")
-                                    .font(.caption)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 3)
-                                    .background(selectedTag == tag ? Color.accentColor : Color.secondary.opacity(0.15))
-                                    .foregroundStyle(selectedTag == tag ? .white : .primary)
-                                    .clipShape(Capsule())
-                                    .onTapGesture {
-                                        selectedTag = selectedTag == tag ? nil : tag
-                                    }
-                            }
-                        }
-                        .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
-                    }
-                }
-
-                Section("Notes") {
-                    ForEach(filtered) { note in
+                Section(store.query.isEmpty ? "Notes" : "Notes · \(notes.count) found") {
+                    ForEach(notes) { note in
                         VStack(alignment: .leading, spacing: 2) {
                             Text(note.title)
                             if !note.tags.isEmpty {
-                                Text(note.tags.map { "#\($0)" }.joined(separator: " "))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                NoteTagLabels(tags: note.tags)
                             }
                         }
                         .tag(note.id)
@@ -87,8 +37,24 @@ struct SidebarView: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .focusSearch)) { _ in
-            searchFocused = true
+    }
+}
+
+/// A note's tags in the list; clicking one makes it the query's tag filter.
+private struct NoteTagLabels: View {
+    @EnvironmentObject var store: NoteStore
+    @EnvironmentObject var tagMetadata: TagMetadataStore
+    let tags: [String]
+
+    var body: some View {
+        FlowLayout(spacing: 4) {
+            ForEach(tags, id: \.self) { tag in
+                Text("#\(tag)")
+                    .font(.caption)
+                    .foregroundStyle(tagMetadata.color(for: tag)?.color ?? .secondary)
+                    .onTapGesture { store.showTag(tag) }
+                    .help("Show notes tagged #\(tag)")
+            }
         }
     }
 }

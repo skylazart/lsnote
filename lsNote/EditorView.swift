@@ -306,6 +306,7 @@ struct FindBarView: View {
 
 struct TagBarView: View {
     @EnvironmentObject var store: NoteStore
+    @EnvironmentObject var tagMetadata: TagMetadataStore
     let note: Note
 
     @State private var newTag = ""
@@ -317,19 +318,19 @@ struct TagBarView: View {
 
     private static let dropdownWidth: CGFloat = 170
 
-    // Input normalized the same way commitTag stores it, so matching is consistent
+    // Input lowercased and hyphenated the way tags are stored, so matching is consistent
     private var normalizedInput: String {
         newTag.trimmingCharacters(in: .whitespacesAndNewlines)
             .lowercased()
             .replacingOccurrences(of: " ", with: "-")
     }
 
+    /// Same ranking as the sidebar search (path prefix, segment prefix, subsequence; then usage).
     private var suggestions: [String] {
         guard !normalizedInput.isEmpty, !suggestionsDismissed else { return [] }
-        let candidates = store.allTags.filter { !note.tags.contains($0) }
-        let prefixed = candidates.filter { $0.hasPrefix(normalizedInput) }
-        let contained = candidates.filter { !$0.hasPrefix(normalizedInput) && $0.contains(normalizedInput) }
-        return Array((prefixed + contained).prefix(8))
+        let counts = Dictionary(uniqueKeysWithValues: store.allTags.map { ($0, store.tagIndex.usageCount($0)) })
+        return TagSuggester.rank(normalizedInput, counts: counts, excluding: Set(note.tags.map(TagPath.normalize)))
+            .map(\.path)
     }
 
     var body: some View {
@@ -338,6 +339,8 @@ struct TagBarView: View {
                 ForEach(note.tags, id: \.self) { tag in
                     HStack(spacing: 3) {
                         Text("#\(tag)").font(.caption)
+                            .onTapGesture { store.showTag(tag) }
+                            .help("Show notes tagged #\(tag)")
                         Button {
                             removeTag(tag)
                         } label: {
@@ -347,8 +350,7 @@ struct TagBarView: View {
                     }
                     .padding(.horizontal, 7)
                     .padding(.vertical, 3)
-                    .background(Color.accentColor.opacity(0.15))
-                    .clipShape(Capsule())
+                    .tagCapsule(tagMetadata.color(for: tag), neutralFill: Color.accentColor.opacity(0.15))
                 }
 
                 TextField("Add tag…", text: $newTag)
@@ -450,7 +452,7 @@ struct TagBarView: View {
         if let index = highlightedIndex, index < suggestions.count {
             commit(suggestions[index])
         } else {
-            commit(normalizedInput)
+            commit(TagPath.normalize(normalizedInput))
         }
     }
 
