@@ -2,32 +2,19 @@ import SwiftUI
 
 struct SidebarView: View {
     @EnvironmentObject var store: NoteStore
-    @State private var query = ""
-    @State private var selectedTag: String? = nil
+    @State private var text = ""
     @FocusState private var searchFocused: Bool
-
-    private var filtered: [Note] {
-        store.notes.filter { note in
-            let matchesTag = selectedTag == nil || note.tags.contains(selectedTag!)
-            guard matchesTag else { return false }
-            guard !query.isEmpty else { return true }
-            let q = query.lowercased()
-            return note.title.lowercased().contains(q)
-                || note.body.lowercased().contains(q)
-                || note.tags.contains(where: { $0.lowercased().contains(q) })
-        }
-    }
 
     var body: some View {
         VStack(spacing: 0) {
             // Search field
             HStack(spacing: 6) {
                 Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("Search", text: $query)
+                TextField("Search", text: $text)
                     .textFieldStyle(.plain)
                     .focused($searchFocused)
-                if !query.isEmpty {
-                    Button { query = "" } label: {
+                if !text.isEmpty {
+                    Button { text = "" } label: {
                         Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
@@ -39,28 +26,8 @@ struct SidebarView: View {
             Divider()
 
             List(selection: $store.selectedID) {
-                if !store.allTags.isEmpty {
-                    Section("Tags") {
-                        FlowLayout(spacing: 6) {
-                            ForEach(store.allTags, id: \.self) { tag in
-                                Text("#\(tag)")
-                                    .font(.caption)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 3)
-                                    .background(selectedTag == tag ? Color.accentColor : Color.secondary.opacity(0.15))
-                                    .foregroundStyle(selectedTag == tag ? .white : .primary)
-                                    .clipShape(Capsule())
-                                    .onTapGesture {
-                                        selectedTag = selectedTag == tag ? nil : tag
-                                    }
-                            }
-                        }
-                        .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
-                    }
-                }
-
                 Section("Notes") {
-                    ForEach(filtered) { note in
+                    ForEach(store.filteredNotes) { note in
                         VStack(alignment: .leading, spacing: 2) {
                             Text(note.title)
                             if !note.tags.isEmpty {
@@ -89,6 +56,9 @@ struct SidebarView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .focusSearch)) { _ in
             searchFocused = true
+        }
+        .onChange(of: text) { _, newText in
+            store.query.setText(newText)
         }
     }
 }

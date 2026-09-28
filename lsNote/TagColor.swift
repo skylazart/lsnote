@@ -8,16 +8,32 @@ enum TagColor: String, Codable, CaseIterable, Identifiable {
 
     var title: String { rawValue.capitalized }
 
-    var color: Color {
+    var nsColor: NSColor {
         switch self {
-        case .red:    return Color(nsColor: .systemRed)
-        case .orange: return Color(nsColor: .systemOrange)
-        case .yellow: return Color(nsColor: .systemYellow)
-        case .green:  return Color(nsColor: .systemGreen)
-        case .teal:   return Color(nsColor: .systemTeal)
-        case .blue:   return Color(nsColor: .systemBlue)
-        case .purple: return Color(nsColor: .systemPurple)
-        case .pink:   return Color(nsColor: .systemPink)
+        case .red:    return .systemRed
+        case .orange: return .systemOrange
+        case .yellow: return .systemYellow
+        case .green:  return .systemGreen
+        case .teal:   return .systemTeal
+        case .blue:   return .systemBlue
+        case .purple: return .systemPurple
+        case .pink:   return .systemPink
         }
+    }
+
+    var color: Color { Color(nsColor: nsColor) }
+}
+
+extension TagColor {
+    /// Non-template dot for menus, which would otherwise tint SF Symbols monochrome.
+    var swatch: NSImage {
+        let nsColor = self.nsColor
+        let image = NSImage(size: NSSize(width: 12, height: 12), flipped: false) { rect in
+            nsColor.setFill()
+            NSBezierPath(ovalIn: rect.insetBy(dx: 1, dy: 1)).fill()
+            return true
+        }
+        image.isTemplate = false
+        return image
     }
 }

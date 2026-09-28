@@ -29,7 +29,7 @@ final class TagMetadataStore: ObservableObject {
 
     private let url: URL
 
-    static let defaultURL: URL = {
+    nonisolated static let defaultURL: URL = {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("lsNote", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

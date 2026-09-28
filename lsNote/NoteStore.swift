@@ -7,6 +7,9 @@ class NoteStore: ObservableObject {
     @Published var isPreview: Bool = false
     /// Tag → notes index, maintained incrementally by every mutation below.
     @Published private(set) var tagIndex = TagIndex()
+    /// Sidebar search; drives the note list and the tag list's counts.
+    @Published var query = SearchQuery()
+    @Published var sidebarSelection: SidebarSelection = .notes
 
     private let saveURL: URL = {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -19,6 +22,27 @@ class NoteStore: ObservableObject {
 
     var allTags: [String] {
         tagIndex.exactTags
+    }
+
+    var filteredNotes: [Note] {
+        query.evaluate(notes, index: tagIndex)
+    }
+
+    /// Clicking a tag in the note list or a note header: that tag replaces the tag filter.
+    func showTag(_ tag: String) {
+        query.replaceTags(with: tag)
+        sidebarSelection = .notes
+    }
+
+    /// Clicking a tag in the sidebar tag list: add it to the query, or remove it if active.
+    func toggleTagFilter(_ tag: String) {
+        query.toggle(tag: tag)
+        sidebarSelection = .notes
+    }
+
+    func excludeTag(_ tag: String) {
+        query.exclude(tag: tag)
+        sidebarSelection = .notes
     }
 
     var selectedNote: Note? {
