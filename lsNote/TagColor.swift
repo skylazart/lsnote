@@ -37,3 +37,13 @@ extension TagColor {
         return image
     }
 }
+
+extension View {
+    /// Capsule tag style: tinted fill and outline for a colored tag, `neutralFill` otherwise.
+    func tagCapsule(_ color: TagColor?, neutralFill: Color) -> some View {
+        self
+            .background(color.map { $0.color.opacity(0.22) } ?? neutralFill)
+            .overlay(Capsule().strokeBorder(color?.color.opacity(0.55) ?? .clear, lineWidth: 1))
+            .clipShape(Capsule())
+    }
+}

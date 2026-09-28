@@ -43,6 +43,7 @@ struct SidebarView: View {
 /// A note's tags in the list; clicking one makes it the query's tag filter.
 private struct NoteTagLabels: View {
     @EnvironmentObject var store: NoteStore
+    @EnvironmentObject var tagMetadata: TagMetadataStore
     let tags: [String]
 
     var body: some View {
@@ -50,7 +51,7 @@ private struct NoteTagLabels: View {
             ForEach(tags, id: \.self) { tag in
                 Text("#\(tag)")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(tagMetadata.color(for: tag)?.color ?? .secondary)
                     .onTapGesture { store.showTag(tag) }
                     .help("Show notes tagged #\(tag)")
             }

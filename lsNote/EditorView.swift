@@ -306,6 +306,7 @@ struct FindBarView: View {
 
 struct TagBarView: View {
     @EnvironmentObject var store: NoteStore
+    @EnvironmentObject var tagMetadata: TagMetadataStore
     let note: Note
 
     @State private var newTag = ""
@@ -349,8 +350,7 @@ struct TagBarView: View {
                     }
                     .padding(.horizontal, 7)
                     .padding(.vertical, 3)
-                    .background(Color.accentColor.opacity(0.15))
-                    .clipShape(Capsule())
+                    .tagCapsule(tagMetadata.color(for: tag), neutralFill: Color.accentColor.opacity(0.15))
                 }
 
                 TextField("Add tag…", text: $newTag)

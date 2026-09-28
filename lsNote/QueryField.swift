@@ -233,8 +233,8 @@ struct QueryChip: View {
         }
         .padding(.horizontal, 7)
         .padding(.vertical, 2)
-        .background(clause.isExclusion ? Color.red.opacity(0.12) : Color.accentColor.opacity(0.15))
-        .clipShape(Capsule())
+        .tagCapsule(clause.tags.lazy.compactMap(tagMetadata.color(for:)).first,
+                    neutralFill: clause.isExclusion ? Color.red.opacity(0.12) : Color.accentColor.opacity(0.15))
         .help(clause.text)
     }
 }
