@@ -2,38 +2,21 @@ import SwiftUI
 
 struct SidebarView: View {
     @EnvironmentObject var store: NoteStore
-    @State private var text = ""
-    @FocusState private var searchFocused: Bool
 
     var body: some View {
+        let notes = store.filteredNotes
         VStack(spacing: 0) {
-            // Search field
-            HStack(spacing: 6) {
-                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("Search", text: $text)
-                    .textFieldStyle(.plain)
-                    .focused($searchFocused)
-                if !text.isEmpty {
-                    Button { text = "" } label: {
-                        Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(7)
-            .background(Color(nsColor: .controlBackgroundColor))
+            QueryField()
 
             Divider()
 
             List(selection: $store.selectedID) {
-                Section("Notes") {
-                    ForEach(store.filteredNotes) { note in
+                Section(store.query.isEmpty ? "Notes" : "Notes · \(notes.count) found") {
+                    ForEach(notes) { note in
                         VStack(alignment: .leading, spacing: 2) {
                             Text(note.title)
                             if !note.tags.isEmpty {
-                                Text(note.tags.map { "#\($0)" }.joined(separator: " "))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                NoteTagLabels(tags: note.tags)
                             }
                         }
                         .tag(note.id)
@@ -54,14 +37,23 @@ struct SidebarView: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .focusSearch)) { _ in
-            searchFocused = true
-        }
-        .onChange(of: text) { _, newText in
-            store.query.setText(newText)
-        }
-        .onChange(of: store.query) { _, query in
-            if query.isEmpty { text = "" }
+    }
+}
+
+/// A note's tags in the list; clicking one makes it the query's tag filter.
+private struct NoteTagLabels: View {
+    @EnvironmentObject var store: NoteStore
+    let tags: [String]
+
+    var body: some View {
+        FlowLayout(spacing: 4) {
+            ForEach(tags, id: \.self) { tag in
+                Text("#\(tag)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .onTapGesture { store.showTag(tag) }
+                    .help("Show notes tagged #\(tag)")
+            }
         }
     }
 }

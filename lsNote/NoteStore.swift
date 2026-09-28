@@ -10,6 +10,8 @@ class NoteStore: ObservableObject {
     /// Sidebar search; drives the note list and the tag list's counts.
     @Published var query = SearchQuery()
     @Published var sidebarSelection: SidebarSelection = .notes
+    /// Bumped by `clearQuery()` so the search field also drops its uncommitted text.
+    @Published private(set) var queryClearCount = 0
 
     private let saveURL: URL = {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -38,6 +40,11 @@ class NoteStore: ObservableObject {
     func toggleTagFilter(_ tag: String) {
         query.toggle(tag: tag)
         sidebarSelection = .notes
+    }
+
+    func clearQuery() {
+        query = SearchQuery()
+        queryClearCount += 1
     }
 
     func excludeTag(_ tag: String) {

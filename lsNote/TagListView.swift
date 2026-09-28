@@ -34,7 +34,7 @@ struct TagListView: View {
         Section {
             if !store.query.isEmpty {
                 Button {
-                    store.query = SearchQuery()
+                    store.clearQuery()
                 } label: {
                     Label("Clear filter", systemImage: "xmark.circle.fill")
                         .font(.caption)

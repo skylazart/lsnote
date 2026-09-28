@@ -36,6 +36,7 @@
 		C008 /* TagMetadataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A020 /* TagMetadataStore.swift */; };
 		C009 /* TagMetadataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D004 /* TagMetadataStoreTests.swift */; };
 		B020 /* TagListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A021 /* TagListView.swift */; };
+		B021 /* QueryField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A022 /* QueryField.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +67,7 @@
 		A020 /* TagMetadataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagMetadataStore.swift; sourceTree = "<group>"; };
 		D004 /* TagMetadataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagMetadataStoreTests.swift; sourceTree = "<group>"; };
 		A021 /* TagListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagListView.swift; sourceTree = "<group>"; };
+		A022 /* QueryField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryField.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,6 +130,7 @@
 				A019 /* TagColor.swift */,
 				A020 /* TagMetadataStore.swift */,
 				A021 /* TagListView.swift */,
+				A022 /* QueryField.swift */,
 			);
 			path = lsNote;
 			sourceTree = "<group>";
@@ -270,6 +273,7 @@
 				B018 /* TagColor.swift in Sources */,
 				B019 /* TagMetadataStore.swift in Sources */,
 				B020 /* TagListView.swift in Sources */,
+				B021 /* QueryField.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
