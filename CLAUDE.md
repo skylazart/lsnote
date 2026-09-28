@@ -10,15 +10,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 xcodebuild -scheme lsNote -configuration Release -derivedDataPath build
 ```
 
-Open `lsNote.xcodeproj` in Xcode to run in debug mode. There is no test suite and no linter configured.
+Open `lsNote.xcodeproj` in Xcode to run in debug mode. No linter is configured.
+
+```bash
+./build.sh test   # XCTest target lsNoteTests
+```
+
+`lsNoteTests` has no app host: it compiles the pure model files (`Note`, `TagIndex`, `SearchQuery`, `TagMetadataStore`, `TagColor`) directly into the test bundle, so tests never launch the app or touch real user data. When adding a file those tests need, add it to both targets' Sources. The Xcode project is hand-maintained (short object IDs such as `A017`/`B017`/`C00x`); a shared scheme lives in `lsNote.xcodeproj/xcshareddata/xcschemes/`.
 
 ## Architecture
 
 lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridges (`NSViewRepresentable`) for the text editor and Markdown preview. No external dependencies.
 
-**State:** `NoteStore` (`ObservableObject`, `@MainActor`) is the single source of truth — injected as `@EnvironmentObject` from `lsNoteApp`. It holds `@Published notes`, `selectedID`, and `isPreview` (global edit/preview toggle, intentionally not per-note). Every mutation auto-saves to `~/Library/Application Support/lsNote/notes.json`.
+**State:** `NoteStore` (`ObservableObject`, `@MainActor`) is the single source of truth — injected as `@EnvironmentObject` from `lsNoteApp`. It holds `@Published notes`, `selectedID`, `isPreview` (global edit/preview toggle, intentionally not per-note), `tagIndex`, `query` (sidebar search) and `sidebarSelection`. Every mutation auto-saves to `~/Library/Application Support/lsNote/notes.json` and updates `tagIndex` incrementally (never rebuilt per keystroke). `TagMetadataStore` is a second environment object for `tags.json` (pins, colors, expansion).
 
-**Layout root:** `ContentView` uses `NavigationSplitView` with three columns — sidebar nav (Notes/TODO selector), `SidebarView` or `TodoView`, and `EditorView`.
+**Layout root:** `ContentView` uses `NavigationSplitView` with three columns — sidebar nav (Notes/TODO selector plus the `TagListView` Tags section), `SidebarView` or `TodoView`, and `EditorView`.
+
+**Tags & search:** see `docs/adr/0003-tag-query-syntax-hierarchy-and-metadata-store.md` for the query syntax and hierarchy rules. `SearchQuery` (parser + evaluator) and `TagIndex` are pure value types; evaluation resolves tag clauses by set operations on the index before any text matching. Hierarchy is derived from `/` in tag strings — never stored. All tag clicks route through `NoteStore.showTag` / `toggleTagFilter` / `excludeTag`; don't add another filtering path. Sort mode and "show all" live in `AppSettings` (`UserDefaults`).
 
 **Text editing:** `MarkdownTextEditor` wraps `MultiCursorTextView` (an `NSTextView` subclass). All formatting helpers (bold, italic, table insert, find+highlight) are static methods on `MarkdownTextEditor`. The find bar highlights matches via `NSLayoutManager` temporary attributes (orange for current, yellow for others) and is invoked with Cmd+F from `EditorView`.
 
@@ -30,7 +38,7 @@ lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridg
 
 **TODO view:** `TodoView` parses `- [ ]`/`- [x]` lines from all notes tagged `#todo`, identifies each item by its line index, and rewrites the note body in-place when toggling.
 
-**Sidebar search focus:** Uses `NotificationCenter` (`Notification.Name.focusSearch`) instead of passing focus state through the view hierarchy — `lsNoteApp` posts on Cmd+Shift+F, `SidebarView` listens.
+**Sidebar search focus:** Uses `NotificationCenter` (`Notification.Name.focusSearch`) instead of passing focus state through the view hierarchy — `lsNoteApp` posts on Cmd+Shift+F, `QueryField` listens.
 
 **Auto-delete:** `EditorView.onDisappear` calls `NoteStore.deleteEmptyNote(id:)`, removing the note and its attachments if the body is blank.
 
@@ -40,5 +48,6 @@ lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridg
 |---|---|
 | Notes | `~/Library/Application Support/lsNote/notes.json` |
 | Attachments | `~/Library/Application Support/lsNote/attachments/<noteID>/` |
+| Tag metadata | `~/Library/Application Support/lsNote/tags.json` |
 
 See `CONTEXT.md` for keyboard shortcuts, detailed data model, and Markdown renderer feature list.
