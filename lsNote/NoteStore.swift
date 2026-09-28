@@ -5,6 +5,8 @@ class NoteStore: ObservableObject {
     @Published var notes: [Note] = []
     @Published var selectedID: UUID?
     @Published var isPreview: Bool = false
+    /// Tag → notes index, maintained incrementally by every mutation below.
+    @Published private(set) var tagIndex = TagIndex()
 
     private let saveURL: URL = {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -16,7 +18,7 @@ class NoteStore: ObservableObject {
     init() { load() }
 
     var allTags: [String] {
-        Array(Set(notes.flatMap(\.tags))).sorted()
+        tagIndex.exactTags
     }
 
     var selectedNote: Note? {
@@ -26,13 +28,20 @@ class NoteStore: ObservableObject {
     func createNote() {
         let note = Note()
         notes.insert(note, at: 0)
+        tagIndex.upsert(note)
         selectedID = note.id
         save()
     }
 
     func update(_ note: Note) {
         guard let idx = notes.firstIndex(where: { $0.id == note.id }) else { return }
+        var note = note
+        let old = notes[idx]
+        if note.body != old.body || note.title != old.title || note.tags != old.tags {
+            note.modifiedAt = .now
+        }
         notes[idx] = note
+        tagIndex.upsert(note)
         save()
     }
 
@@ -40,6 +49,7 @@ class NoteStore: ObservableObject {
         guard let note = notes.first(where: { $0.id == id }), note.isEmpty else { return }
         ImageStore.deleteAll(noteID: id)
         notes.removeAll { $0.id == id }
+        tagIndex.remove(noteID: id)
         if selectedID == id { selectedID = notes.first?.id }
         save()
     }
@@ -50,6 +60,7 @@ class NoteStore: ObservableObject {
         note.title = url.deletingPathExtension().lastPathComponent
         note.body = content
         notes.insert(note, at: 0)
+        tagIndex.upsert(note)
         selectedID = note.id
         save()
     }
@@ -57,6 +68,7 @@ class NoteStore: ObservableObject {
     func delete(id: UUID) {
         ImageStore.deleteAll(noteID: id)
         notes.removeAll { $0.id == id }
+        tagIndex.remove(noteID: id)
         if selectedID == id { selectedID = notes.first?.id }
         save()
     }
@@ -70,6 +82,7 @@ class NoteStore: ObservableObject {
         guard let data = try? Data(contentsOf: saveURL),
               let decoded = try? JSONDecoder().decode([Note].self, from: data) else { return }
         notes = decoded
+        tagIndex = TagIndex(notes: decoded)
         selectedID = notes.first?.id
     }
 }
