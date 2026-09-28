@@ -9,9 +9,14 @@ struct TagListView: View {
 
     private static let collapsedLimit = 10
 
-    /// Node counts to display (global subtree counts).
+    /// Node counts to display: global with no query; otherwise faceted over the current
+    /// results, hiding zero-count tags except the ones the query itself mentions.
     private var counts: [String: Int] {
-        store.tagIndex.globalCounts
+        let query = store.query
+        guard !query.isEmpty else { return store.tagIndex.globalCounts }
+        let resultIDs = Set(store.filteredNotes.map(\.id))
+        let facets = store.tagIndex.facets(for: resultIDs, keeping: query.activeTags)
+        return Dictionary(uniqueKeysWithValues: facets.map { ($0.path, $0.count) })
     }
 
     var body: some View {
@@ -20,9 +25,24 @@ struct TagListView: View {
         let pinned = tagMetadata.metadata.pinned.compactMap { nodesByPath[$0] }
         let pinnedPaths = Set(pinned.map(\.path))
         let unpinned = roots.filter { !pinnedPaths.contains($0.path) }
-        let shown = settings.tagListShowAll ? unpinned : Array(unpinned.prefix(Self.collapsedLimit))
+        // Beyond the top 10, still show any root whose subtree holds a tag from the query.
+        let active = store.query.activeTags
+        let shown = settings.tagListShowAll ? unpinned : unpinned.enumerated().filter { i, node in
+            i < Self.collapsedLimit || active.contains { TagPath.isInSubtree($0, of: node.path) }
+        }.map(\.element)
 
         Section {
+            if !store.query.isEmpty {
+                Button {
+                    store.query = SearchQuery()
+                } label: {
+                    Label("Clear filter", systemImage: "xmark.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+
             ForEach(pinned) { node in
                 TagTreeRow(node: node, showsFullPath: true)
             }
@@ -115,6 +135,7 @@ private struct TagRow: View {
     let showsFullPath: Bool
 
     private var isActive: Bool { store.query.activeTags.contains(node.path) }
+    private var isExcluded: Bool { store.query.excludedTags.contains(node.path) }
     private var isPinned: Bool { tagMetadata.isPinned(node.path) }
 
     var body: some View {
@@ -125,6 +146,7 @@ private struct TagRow: View {
             Text(showsFullPath ? node.path : node.name)
                 .lineLimit(1)
                 .fontWeight(isActive ? .semibold : .regular)
+                .strikethrough(isExcluded)
             Spacer(minLength: 4)
             if isPinned {
                 Image(systemName: "pin.fill")

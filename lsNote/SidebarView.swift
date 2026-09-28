@@ -60,6 +60,9 @@ struct SidebarView: View {
         .onChange(of: text) { _, newText in
             store.query.setText(newText)
         }
+        .onChange(of: store.query) { _, query in
+            if query.isEmpty { text = "" }
+        }
     }
 }
 
