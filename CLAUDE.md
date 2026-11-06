@@ -20,7 +20,7 @@ Open `lsNote.xcodeproj` in Xcode to run in debug mode. No linter is configured.
 
 ## Architecture
 
-lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridges (`NSViewRepresentable`) for the text editor and Markdown preview. No external dependencies.
+lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridges (`NSViewRepresentable`) for the text editor and Markdown preview. No package dependencies; the only third-party code is the vendored `mermaid.min.js` in `lsNote/Vendor/` (see `docs/adr/0004-render-mermaid-with-bundled-mermaid-js.md`).
 
 **State:** `NoteStore` (`ObservableObject`, `@MainActor`) is the single source of truth — injected as `@EnvironmentObject` from `lsNoteApp`. It holds `@Published notes`, `selectedID`, `isPreview` (global edit/preview toggle, intentionally not per-note), `tagIndex`, `query` (sidebar search) and `sidebarSelection`. Edits go through `update(id) { $0… }` (mutate the current stored note — never pass back a whole `Note` copied in a render, it may be stale). Every mutation updates `tagIndex` incrementally (never rebuilt per keystroke) and saves `~/Library/Application Support/lsNote/notes.json` atomically: immediately for create/delete/import, debounced 750 ms for `update`; call `save()` to flush before reading the file (backup) — `AppDelegate` flushes on quit. `TagMetadataStore` is a second environment object for `tags.json` (pins, colors, expansion).
 
@@ -32,7 +32,7 @@ lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridg
 
 **Multi-cursor:** `MultiCursorTextView` implements column editing (Alt+drag, Alt+Shift+↑/↓) and multi-match selection (⌘G next / ⇧⌘G previous / ⇧⌘L all occurrences; word-boundary matching when the seed selection was a double-click). Cursor state lives in its `cursors` array (NSTextView has no multi-cursor API); all simultaneous edits go through one `shouldChangeText(inRanges:replacementStrings:)` call so each operation is a single undo step. Escape, a plain click/selection change, or any external text mutation exits multi-cursor mode. `EditorView` shows a status badge ("3 of 7 matches selected") via the `onMultiCursorStatus` callback. The short-line column behavior (skip vs. insert at end of line) is configurable via `AppSettings.columnInsertAtLineEnd`.
 
-**Markdown preview:** `MarkdownPreview` wraps `WKWebView` with a fully custom GFM renderer written in Swift — no Markdown libraries. Attachment images use the syntax `![caption](attachment:uuid.png [WxH])` and are embedded as base64 data URIs to bypass WKWebView's file:// restrictions.
+**Markdown preview:** `MarkdownPreview` wraps `WKWebView` with a fully custom GFM renderer written in Swift — no Markdown libraries. Attachment images use the syntax `![caption](attachment:uuid.png [WxH])` and are embedded as base64 data URIs to bypass WKWebView's file:// restrictions. ```` ```mermaid ```` fences become `<pre class="mermaid">`; the bundled mermaid.js is evaluated in `didFinish` only when the note has one.
 
 **Images:** `ImageStore` saves PNGs to `~/Library/Application Support/lsNote/attachments/<noteID>/`. Insertion happens via file picker or clipboard paste from `EditorView`'s toolbar.
 
