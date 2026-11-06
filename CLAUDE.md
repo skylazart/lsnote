@@ -16,13 +16,13 @@ Open `lsNote.xcodeproj` in Xcode to run in debug mode. No linter is configured.
 ./build.sh test   # XCTest target lsNoteTests
 ```
 
-`lsNoteTests` has no app host: it compiles the pure model files (`Note`, `TagIndex`, `SearchQuery`, `TagMetadataStore`, `TagColor`) directly into the test bundle, so tests never launch the app or touch real user data. When adding a file those tests need, add it to both targets' Sources. The Xcode project is hand-maintained (short object IDs such as `A017`/`B017`/`C00x`); a shared scheme lives in `lsNote.xcodeproj/xcshareddata/xcschemes/`.
+`lsNoteTests` has no app host: it compiles the pure model files (`Note`, `TagIndex`, `SearchQuery`, `TagMetadataStore`, `TagColor`, `NoteExport`) directly into the test bundle, so tests never launch the app or touch real user data. When adding a file those tests need, add it to both targets' Sources. The Xcode project is hand-maintained (short object IDs such as `A017`/`B017`/`C00x`); a shared scheme lives in `lsNote.xcodeproj/xcshareddata/xcschemes/`.
 
 ## Architecture
 
 lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridges (`NSViewRepresentable`) for the text editor and Markdown preview. No external dependencies.
 
-**State:** `NoteStore` (`ObservableObject`, `@MainActor`) is the single source of truth — injected as `@EnvironmentObject` from `lsNoteApp`. It holds `@Published notes`, `selectedID`, `isPreview` (global edit/preview toggle, intentionally not per-note), `tagIndex`, `query` (sidebar search) and `sidebarSelection`. Edits go through `update(id) { $0… }` (mutate the current stored note — never pass back a whole `Note` copied in a render, it may be stale). Every mutation updates `tagIndex` incrementally (never rebuilt per keystroke) and saves `~/Library/Application Support/lsNote/notes.json` atomically: immediately for create/delete/import, debounced 750 ms for `update`; `save()` flushes immediately — `AppDelegate` flushes on quit. `TagMetadataStore` is a second environment object for `tags.json` (pins, colors, expansion).
+**State:** `NoteStore` (`ObservableObject`, `@MainActor`) is the single source of truth — injected as `@EnvironmentObject` from `lsNoteApp`. It holds `@Published notes`, `selectedID`, `isPreview` (global edit/preview toggle, intentionally not per-note), `tagIndex`, `query` (sidebar search) and `sidebarSelection`. Edits go through `update(id) { $0… }` (mutate the current stored note — never pass back a whole `Note` copied in a render, it may be stale). Every mutation updates `tagIndex` incrementally (never rebuilt per keystroke) and saves `~/Library/Application Support/lsNote/notes.json` atomically: immediately for create/delete/import, debounced 750 ms for `update`; call `save()` to flush before reading the file (backup) — `AppDelegate` flushes on quit. `TagMetadataStore` is a second environment object for `tags.json` (pins, colors, expansion).
 
 **Layout root:** `ContentView` uses `NavigationSplitView` with three columns — sidebar nav (Notes/TODO selector plus the `TagListView` Tags section), `SidebarView` or `TodoView`, and `EditorView`.
 
@@ -39,6 +39,8 @@ lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridg
 **TODO view:** `TodoView` parses `- [ ]`/`- [x]` lines from all notes tagged `#todo`, identifies each item by its line index, and rewrites the note body in-place when toggling.
 
 **Sidebar search focus:** Uses `NotificationCenter` (`Notification.Name.focusSearch`) instead of passing focus state through the view hierarchy — `lsNoteApp` posts on Cmd+Shift+F, `QueryField` listens.
+
+**Backup & export:** File menu commands call `ExportPanels` (AppKit panels/alerts), which delegates to the Foundation-only `MarkdownExport` and `NoteBackup` in `NoteExport.swift`. Backup zips the whole data folder; Markdown export writes front matter + body and rewrites `attachment:` links to a sibling `attachments/` folder.
 
 **Auto-delete:** `EditorView.onDisappear` calls `NoteStore.deleteEmptyNote(id:)`, removing the note and its attachments if the body is blank.
 

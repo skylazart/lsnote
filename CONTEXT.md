@@ -24,7 +24,7 @@ lsNote is a macOS note-taking app built with SwiftUI. Notes are written in Markd
 | `modifiedAt` | Date | Last title/body/tag change; falls back to `createdAt` for notes saved before it existed |
 
 ### `NoteStore` (ObservableObject, @MainActor)
-Central state. Published: `notes`, `selectedID`, `isPreview`, `tagIndex`, `query` (sidebar search), `sidebarSelection` (Notes/TODO). Mutations go through `update(id) { … }`; notes.json is written atomically (debounced 750 ms for edits, immediately for create/delete/import, flushed on quit). `tagIndex` is updated incrementally. `filteredNotes` evaluates `query` against the index.
+Central state. Published: `notes`, `selectedID`, `isPreview`, `tagIndex`, `query` (sidebar search), `sidebarSelection` (Notes/TODO). Mutations go through `update(id) { … }`; notes.json is written atomically (debounced 750 ms for edits, immediately for create/delete/import, flushed on quit and before a backup). `tagIndex` is updated incrementally. `filteredNotes` evaluates `query` against the index.
 
 ### `TagIndex` (value type)
 Exact tag → note IDs, note → tags, note → `modifiedAt`. Resolves a tag to its subtree's notes, gives deduplicated subtree counts, last-used dates, the derived hierarchy tree (`tree(counts:sortedBy:)`) and result-restricted `facets(for:keeping:)`.
@@ -53,7 +53,9 @@ lsNote/
 ├── TodoView.swift         # Aggregated TODO list from notes tagged #todo; toggle done/pending
 ├── Note.swift             # Note model
 ├── NoteStore.swift        # State + persistence
-└── ImageStore.swift       # PNG save/load/delete helpers
+├── ImageStore.swift       # PNG save/load/delete helpers
+├── NoteExport.swift       # MarkdownExport (notes → .md files) and NoteBackup (data folder → zip); Foundation-only
+└── ExportPanels.swift     # Save/open panels, error alerts and Finder reveal for export and backup
 lsNoteTests/               # XCTest target; compiles the pure model files directly (no app host)
 ```
 
@@ -65,6 +67,7 @@ lsNoteTests/               # XCTest target; compiles the pure model files direct
 | ⌘N | New note |
 | ⌘F | Open in-note find bar (EditorView) |
 | ⇧⌘F | Focus sidebar search field |
+| ⇧⌘E | Export selected note as Markdown |
 | `#` / `-#` in search | Tag suggestions (↑/↓, Return/Tab accept, Esc dismiss) |
 | Backspace in empty search | Remove last tag chip |
 | ⌘B | Bold selection |
@@ -113,6 +116,10 @@ When the editor disappears, `NoteStore.deleteEmptyNote` removes the note if its 
 ### Markdown Preview
 Custom renderer (no external dependencies). Supports: headings, bold/italic/strikethrough, inline code, fenced code blocks (collapsible `<details>`), blockquotes, unordered/ordered lists, GFM tables, horizontal rules, links, standard images, attachment images (`![title](attachment:filename.png [WxH])`), and inline math (`$\command$` — Greek letters, binary/relation operators, arrows, and other common symbols mapped to Unicode; see `mathSymbols` in `MarkdownPreview.swift`).
 
+### Backup & Markdown Export (File menu)
+- **Back Up All Notes…** zips `notes.json`, `tags.json` and `attachments/` into `lsNote Backup <yyyy-MM-dd HHmmss>.zip` (staged in a temp folder, zipped with `NSFileCoordinator`'s `.forUploading`). To restore, quit the app and copy the unzipped folder's contents into `~/Library/Application Support/lsNote/`.
+- **Export All Notes as Markdown…** asks for a parent folder and writes into a new `lsNote Export <timestamp>` subfolder, so nothing existing is overwritten. **Export Note as Markdown…** (⇧⌘E, or the note list context menu) saves one file.
+- Each file is `<title>.md` (illegal path characters → `-`, duplicates get ` 2`, ` 3`…) with YAML front matter (`title`, `tags`, `created`, `modified`) and the body. `attachment:` images are rewritten to `attachments/<file>.png` and the PNGs copied next to the Markdown; the optional `WxH` size is dropped. File dates are set to the note's.
 
 ## Attachment Images
 - Syntax in editor: `![caption](attachment:uuid.png)` or `![caption](attachment:uuid.png 400x300)`

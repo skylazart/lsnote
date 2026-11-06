@@ -53,6 +53,23 @@ struct lsNoteApp: App {
                 }
                 .keyboardShortcut("n", modifiers: .command)
             }
+            CommandGroup(after: .newItem) {
+                Divider()
+                Button("Export Note as Markdown…") {
+                    if let note = store.selectedNote { ExportPanels.export(note) }
+                }
+                .keyboardShortcut("e", modifiers: [.command, .shift])
+                .disabled(store.selectedNote == nil)
+                Button("Export All Notes as Markdown…") {
+                    ExportPanels.exportAll(store.notes)
+                }
+                .disabled(store.notes.isEmpty)
+                Divider()
+                Button("Back Up All Notes…") {
+                    store.save() // the backup copies notes.json; flush any debounced save first
+                    ExportPanels.backUpAllNotes()
+                }
+            }
             CommandGroup(replacing: .textEditing) {
                 Button("Search") {
                     NotificationCenter.default.post(name: .focusSearch, object: nil)
