@@ -14,6 +14,7 @@ struct EditorView: View {
     @State private var matchIndex = 0
     @State private var matchCount = 0
     @State private var multiCursorStatus: String? = nil
+    @State private var pushedBodies = PushedBodies()
 
     private var isLocked: Bool { note.isLocked }
 
@@ -81,13 +82,17 @@ struct EditorView: View {
             }
         }
         .onAppear { text = note.body }
+        // The text view is the source of truth while editing. `note` arrives one render late,
+        // so while typing its body is often an older value this editor already pushed; copying
+        // that back would undo the latest keystrokes. Only adopt bodies the editor didn't write
+        // (e.g. a checkbox toggled in the TODO view).
         .onChange(of: note.body) { _, newValue in
+            if pushedBodies.acknowledge(newValue) { return }
             if text != newValue { text = newValue }
         }
         .onChange(of: text) { _, newValue in
-            var updated = note
-            updated.body = newValue
-            store.update(updated)
+            pushedBodies.append(newValue)
+            store.update(note.id) { $0.body = newValue }
         }
         .onChange(of: findQuery) { _, _ in
             matchIndex = 0
@@ -135,9 +140,7 @@ struct EditorView: View {
 
     private func attachImage(_ image: NSImage) {
         guard let filename = ImageStore.save(image, noteID: note.id) else { return }
-        var updated = note
-        updated.attachments.append(filename)
-        store.update(updated)
+        store.update(note.id) { $0.attachments.append(filename) }
     }
 
     private func pasteImage() {
@@ -177,9 +180,7 @@ struct EditorView: View {
                 .help("Find in Note (⌘F)")
 
                 Button {
-                    var updated = note
-                    updated.isLocked.toggle()
-                    store.update(updated)
+                    store.update(note.id) { $0.isLocked.toggle() }
                 } label: {
                     Image(systemName: isLocked ? "lock.fill" : "lock.open")
                 }
@@ -248,16 +249,31 @@ struct EditorView: View {
                 Divider().frame(height: 16).padding(.horizontal, 4)
             }
 
-            Picker("", selection: $store.isPreview) {
-                Label("Edit", systemImage: "pencil").tag(false)
-                Label("Preview", systemImage: "eye").tag(true)
-            }
-            .pickerStyle(.segmented)
-            .frame(width: 140)
-            .padding(.trailing, 8)
+            PreviewModePicker(isPreview: store.isPreview) { store.isPreview = $0 }
+                .equatable()
+                .padding(.trailing, 8)
         }
         .frame(height: 36)
         .background(.bar)
+    }
+}
+
+/// Edit/Preview toggle. The editor re-renders on every keystroke, and re-evaluating a segmented
+/// Picker makes AppKit redraw its segments (a visible blink), so this only re-renders when the
+/// mode itself changes.
+private struct PreviewModePicker: View, Equatable {
+    let isPreview: Bool
+    let setPreview: (Bool) -> Void
+
+    static func == (a: Self, b: Self) -> Bool { a.isPreview == b.isPreview }
+
+    var body: some View {
+        Picker("", selection: Binding(get: { isPreview }, set: setPreview)) {
+            Label("Edit", systemImage: "pencil").tag(false)
+            Label("Preview", systemImage: "eye").tag(true)
+        }
+        .pickerStyle(.segmented)
+        .frame(width: 140)
     }
 }
 
@@ -463,15 +479,30 @@ struct TagBarView: View {
             suggestionsDismissed = false
         }
         guard !tag.isEmpty, !note.tags.contains(tag) else { return }
-        var updated = note
-        updated.tags.append(tag)
-        store.update(updated)
+        store.update(note.id) { $0.tags.append(tag) }
     }
 
     private func removeTag(_ tag: String) {
-        var updated = note
-        updated.tags.removeAll { $0 == tag }
-        store.update(updated)
+        store.update(note.id) { $0.tags.removeAll { $0 == tag } }
+    }
+}
+
+/// Bodies the editor has sent to the store whose echo (via `note.body`) hasn't come back yet.
+/// A reference type so recording a keystroke doesn't trigger another render.
+private final class PushedBodies {
+    private var queue: [String] = []
+
+    func append(_ body: String) { queue.append(body) }
+
+    /// True if `body` is an echo of an editor write; drops it and anything older.
+    /// False means someone else wrote the body, so pending echoes are discarded.
+    func acknowledge(_ body: String) -> Bool {
+        guard let i = queue.firstIndex(of: body) else {
+            queue.removeAll()
+            return false
+        }
+        queue.removeFirst(i + 1)
+        return true
     }
 }
 
@@ -505,9 +536,7 @@ struct AttachmentsView: View {
 
     private func removeAttachment(_ filename: String) {
         ImageStore.delete(filename: filename, noteID: note.id)
-        var updated = note
-        updated.attachments.removeAll { $0 == filename }
-        store.update(updated)
+        store.update(note.id) { $0.attachments.removeAll { $0 == filename } }
     }
 }
 

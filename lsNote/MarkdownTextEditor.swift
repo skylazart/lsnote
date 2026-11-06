@@ -51,8 +51,11 @@ struct MarkdownTextEditor: NSViewRepresentable {
             let length = (text as NSString).length
             tv.setSelectedRange(NSRange(location: min(sel.location, length), length: 0))
         }
-        tv.isEditable = !isLocked
-        tv.font = font
+        context.coordinator.parent = self
+        // updateNSView runs after every keystroke. Assigning `font` restyles and re-lays out
+        // the whole document (visible flicker, last line briefly clipped), so only do it on change.
+        if tv.isEditable == isLocked { tv.isEditable = !isLocked }
+        if tv.font != font { tv.font = font }
         tv.insertAtLineEndWhenShort = columnInsertAtLineEnd
         tv.onStatusChange = onMultiCursorStatus
     }

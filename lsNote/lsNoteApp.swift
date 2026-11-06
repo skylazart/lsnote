@@ -14,6 +14,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     private var pendingURLs: [URL] = []
 
+    func applicationWillTerminate(_ notification: Notification) {
+        MainActor.assumeIsolated { store?.save() }
+    }
+
     func application(_ application: NSApplication, open urls: [URL]) {
         guard let store else {
             pendingURLs.append(contentsOf: urls)
