@@ -64,16 +64,21 @@ class NoteStore: ObservableObject {
         save()
     }
 
-    func update(_ note: Note) {
-        guard let idx = notes.firstIndex(where: { $0.id == note.id }) else { return }
-        var note = note
+    /// Applies `change` to the current stored note. Views pass a closure rather than a whole
+    /// `Note` so a copy captured in an earlier render can't overwrite newer edits.
+    /// Saving is debounced: this runs on every keystroke.
+    func update(_ id: UUID, _ change: (inout Note) -> Void) {
+        guard let idx = notes.firstIndex(where: { $0.id == id }) else { return }
         let old = notes[idx]
+        var note = old
+        change(&note)
+        guard note != old else { return }
         if note.body != old.body || note.title != old.title || note.tags != old.tags {
             note.modifiedAt = .now
         }
         notes[idx] = note
         tagIndex.upsert(note)
-        save()
+        scheduleSave()
     }
 
     func deleteEmptyNote(id: UUID) {
@@ -104,9 +109,24 @@ class NoteStore: ObservableObject {
         save()
     }
 
-    private func save() {
+    /// Writes notes.json now, replacing any pending debounced save. Call before anything
+    /// reads the file (backup) and on quit.
+    func save() {
+        pendingSave?.cancel()
+        pendingSave = nil
         guard let data = try? JSONEncoder().encode(notes) else { return }
-        try? data.write(to: saveURL)
+        try? data.write(to: saveURL, options: .atomic)
+    }
+
+    private var pendingSave: Task<Void, Never>?
+
+    private func scheduleSave() {
+        pendingSave?.cancel()
+        pendingSave = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(750))
+            guard !Task.isCancelled else { return }
+            self?.save()
+        }
     }
 
     private func load() {

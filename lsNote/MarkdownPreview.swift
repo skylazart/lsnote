@@ -11,6 +11,11 @@ struct MarkdownPreview: NSViewRepresentable {
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
+    /// Bundled mermaid.js (see lsNote/Vendor/README.md). nil if the resource is missing,
+    /// in which case mermaid blocks render as ordinary code blocks.
+    static let mermaidSource: String? = Bundle.main.url(forResource: "mermaid.min", withExtension: "js")
+        .flatMap { try? String(contentsOf: $0, encoding: .utf8) }
+
     func makeNSView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
         let view = WKWebView(frame: .zero, configuration: config)
@@ -20,8 +25,17 @@ struct MarkdownPreview: NSViewRepresentable {
     }
 
     func updateNSView(_ webView: WKWebView, context: Context) {
+        context.coordinator.needsMermaid = Self.mermaidSource != nil && Self.containsMermaid(text)
         webView.loadHTMLString(html(for: text, attachments: note?.attachments ?? [], noteID: note?.id),
                                baseURL: nil)
+    }
+
+    private static func isMermaidFence(_ line: String) -> Bool {
+        line.hasPrefix("```") && line.dropFirst(3).trimmingCharacters(in: .whitespaces).lowercased() == "mermaid"
+    }
+
+    static func containsMermaid(_ markdown: String) -> Bool {
+        markdown.components(separatedBy: "\n").contains(where: isMermaidFence)
     }
 
     // MARK: - Minimal GFM renderer
@@ -57,6 +71,9 @@ struct MarkdownPreview: NSViewRepresentable {
           figure { margin: 12px 0; }
           figure img { display: block; border-radius: 6px; }
           figcaption { font-size: 12px; color: #888; margin-top: 4px; }
+          /* Hidden until mermaid.js replaces the source with an SVG (sets data-processed). */
+          pre.mermaid { background: transparent; text-align: center; }
+          pre.mermaid:not([data-processed]) { visibility: hidden; }
           .math { font-family: "Times New Roman", Cambria, Georgia, serif; font-style: italic; }
           @media (prefers-color-scheme: dark) {
             body { color: #f2f2f7; }
@@ -94,7 +111,12 @@ struct MarkdownPreview: NSViewRepresentable {
                     i += 1
                 }
                 let label = lang.isEmpty ? "code" : lang
-                html += "<details open><summary>\(label)</summary><pre><code>\(code)</code></pre></details>\n"
+                if Self.mermaidSource != nil, Self.isMermaidFence(line) {
+                    // mermaid.js decodes the escaped source from the element and swaps in an SVG.
+                    html += "<details open><summary>\(label)</summary><pre class=\"mermaid\">\(code)</pre></details>\n"
+                } else {
+                    html += "<details open><summary>\(label)</summary><pre><code>\(code)</code></pre></details>\n"
+                }
                 i += 1
                 continue
             }
@@ -269,6 +291,23 @@ struct MarkdownPreview: NSViewRepresentable {
     }
 
     class Coordinator: NSObject, WKNavigationDelegate {
+        /// Set per render; the library is only evaluated on pages that contain a diagram.
+        var needsMermaid = false
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            guard needsMermaid, let source = MarkdownPreview.mermaidSource else { return }
+            let run = """
+            mermaid.initialize({
+              startOnLoad: false,
+              securityLevel: 'strict',
+              theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
+            });
+            mermaid.run();
+            """
+            // Trailing `void 0`: the last value (a Promise) can't be bridged back to Swift.
+            webView.evaluateJavaScript(source + "\n;" + run + "\nvoid 0;")
+        }
+
         func webView(_ webView: WKWebView,
                      decidePolicyFor action: WKNavigationAction,
                      decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {

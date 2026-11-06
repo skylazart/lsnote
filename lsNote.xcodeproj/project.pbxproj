@@ -22,6 +22,7 @@
 		B014 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A014 /* SettingsView.swift */; };
 		B008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A008 /* Assets.xcassets */; };
 		B009 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = A009 /* AppIcon.icns */; };
+		B024 /* mermaid.min.js in Resources */ = {isa = PBXBuildFile; fileRef = A025 /* mermaid.min.js */; };
 		B016 /* TagIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = A017 /* TagIndex.swift */; };
 		C001 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = A002 /* Note.swift */; };
 		C002 /* TagIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = A017 /* TagIndex.swift */; };
@@ -37,6 +38,10 @@
 		C009 /* TagMetadataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D004 /* TagMetadataStoreTests.swift */; };
 		B020 /* TagListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A021 /* TagListView.swift */; };
 		B021 /* QueryField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A022 /* QueryField.swift */; };
+		B022 /* NoteExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A023 /* NoteExport.swift */; };
+		B023 /* ExportPanels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A024 /* ExportPanels.swift */; };
+		C010 /* NoteExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A023 /* NoteExport.swift */; };
+		C011 /* NoteExportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D005 /* NoteExportTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,6 +60,9 @@
 		A014 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A009 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
+		A025 /* mermaid.min.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = mermaid.min.js; sourceTree = "<group>"; };
+		A026 /* mermaid-LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = "mermaid-LICENSE"; sourceTree = "<group>"; };
+		A027 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		A016 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		PRDT /* lsNoteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = lsNoteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		PROD /* lsNote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = lsNote.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -68,6 +76,9 @@
 		D004 /* TagMetadataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagMetadataStoreTests.swift; sourceTree = "<group>"; };
 		A021 /* TagListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagListView.swift; sourceTree = "<group>"; };
 		A022 /* QueryField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryField.swift; sourceTree = "<group>"; };
+		A023 /* NoteExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteExport.swift; sourceTree = "<group>"; };
+		A024 /* ExportPanels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportPanels.swift; sourceTree = "<group>"; };
+		D005 /* NoteExportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteExportTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +142,9 @@
 				A020 /* TagMetadataStore.swift */,
 				A021 /* TagListView.swift */,
 				A022 /* QueryField.swift */,
+				A023 /* NoteExport.swift */,
+				A024 /* ExportPanels.swift */,
+				GRP4 /* Vendor */,
 			);
 			path = lsNote;
 			sourceTree = "<group>";
@@ -151,8 +165,19 @@
 				D002 /* TagIndexTests.swift */,
 				D003 /* SearchQueryTests.swift */,
 				D004 /* TagMetadataStoreTests.swift */,
+				D005 /* NoteExportTests.swift */,
 			);
 			path = lsNoteTests;
+			sourceTree = "<group>";
+		};
+		GRP4 /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				A025 /* mermaid.min.js */,
+				A026 /* mermaid-LICENSE */,
+				A027 /* README.md */,
+			);
+			path = Vendor;
 			sourceTree = "<group>";
 		};
 		ROOT = {
@@ -245,6 +270,7 @@
 			files = (
 				B008 /* Assets.xcassets in Resources */,
 				B009 /* AppIcon.icns in Resources */,
+				B024 /* mermaid.min.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,6 +300,8 @@
 				B019 /* TagMetadataStore.swift in Sources */,
 				B020 /* TagListView.swift in Sources */,
 				B021 /* QueryField.swift in Sources */,
+				B022 /* NoteExport.swift in Sources */,
+				B023 /* ExportPanels.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -290,6 +318,8 @@
 				C007 /* TagColor.swift in Sources */,
 				C008 /* TagMetadataStore.swift in Sources */,
 				C009 /* TagMetadataStoreTests.swift in Sources */,
+				C010 /* NoteExport.swift in Sources */,
+				C011 /* NoteExportTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

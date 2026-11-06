@@ -21,6 +21,10 @@ struct SidebarView: View {
                         }
                         .tag(note.id)
                         .contextMenu {
+                            Button("Export as Markdown…") {
+                                ExportPanels.export(note)
+                            }
+                            Divider()
                             Button("Delete", role: .destructive) {
                                 store.delete(id: note.id)
                             }

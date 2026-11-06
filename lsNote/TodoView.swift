@@ -85,8 +85,7 @@ struct TodoView: View {
         } else {
             lines[lineIndex] = lines[lineIndex].replacingOccurrences(of: "- [ ] ", with: "- [X] ", range: lines[lineIndex].startIndex..<lines[lineIndex].index(lines[lineIndex].startIndex, offsetBy: 6))
         }
-        var updated = note
-        updated.body = lines.joined(separator: "\n")
-        store.update(updated)
+        let body = lines.joined(separator: "\n")
+        store.update(note.id) { $0.body = body }
     }
 }
