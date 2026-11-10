@@ -85,6 +85,20 @@ struct MarkdownTextEditor: NSViewRepresentable {
         }
     }
 
+    /// Replaces `range` as one undoable edit and selects the new text (or `selecting`, a range
+    /// in the resulting document).
+    static func replaceText(in textView: NSTextView?, range: NSRange, with text: String,
+                            selecting: NSRange? = nil) {
+        guard let tv = textView else { return }
+        if tv.shouldChangeText(in: range, replacementString: text) {
+            tv.replaceCharacters(in: range, with: text)
+            tv.didChangeText()
+            let inserted = selecting ?? NSRange(location: range.location, length: (text as NSString).length)
+            tv.setSelectedRange(inserted)
+            tv.scrollRangeToVisible(inserted)
+        }
+    }
+
     static func insertCodeBlock(in textView: NSTextView?) {
         guard let tv = textView else { return }
         let range = tv.selectedRange()

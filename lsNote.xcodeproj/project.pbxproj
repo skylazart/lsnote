@@ -46,6 +46,11 @@
 		C011 /* NoteExportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D005 /* NoteExportTests.swift */; };
 		C012 /* HeadingAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A029 /* HeadingAnchor.swift */; };
 		C013 /* HeadingAnchorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D006 /* HeadingAnchorTests.swift */; };
+		B027 /* AIAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A030 /* AIAction.swift */; };
+		B028 /* AIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A031 /* AIClient.swift */; };
+		B029 /* AIActionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A032 /* AIActionSheet.swift */; };
+		C014 /* AIAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = A030 /* AIAction.swift */; };
+		C015 /* AIActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D007 /* AIActionTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,6 +91,10 @@
 		A029 /* HeadingAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadingAnchor.swift; sourceTree = "<group>"; };
 		D005 /* NoteExportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteExportTests.swift; sourceTree = "<group>"; };
 		D006 /* HeadingAnchorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadingAnchorTests.swift; sourceTree = "<group>"; };
+		A030 /* AIAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAction.swift; sourceTree = "<group>"; };
+		A031 /* AIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIClient.swift; sourceTree = "<group>"; };
+		A032 /* AIActionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIActionSheet.swift; sourceTree = "<group>"; };
+		D007 /* AIActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIActionTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,6 +162,9 @@
 				A024 /* ExportPanels.swift */,
 				A028 /* HTMLExport.swift */,
 				A029 /* HeadingAnchor.swift */,
+				A030 /* AIAction.swift */,
+				A031 /* AIClient.swift */,
+				A032 /* AIActionSheet.swift */,
 				GRP4 /* Vendor */,
 			);
 			path = lsNote;
@@ -176,6 +188,7 @@
 				D004 /* TagMetadataStoreTests.swift */,
 				D005 /* NoteExportTests.swift */,
 				D006 /* HeadingAnchorTests.swift */,
+				D007 /* AIActionTests.swift */,
 			);
 			path = lsNoteTests;
 			sourceTree = "<group>";
@@ -314,6 +327,9 @@
 				B023 /* ExportPanels.swift in Sources */,
 				B025 /* HTMLExport.swift in Sources */,
 				B026 /* HeadingAnchor.swift in Sources */,
+				B027 /* AIAction.swift in Sources */,
+				B028 /* AIClient.swift in Sources */,
+				B029 /* AIActionSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,6 +350,8 @@
 				C011 /* NoteExportTests.swift in Sources */,
 				C012 /* HeadingAnchor.swift in Sources */,
 				C013 /* HeadingAnchorTests.swift in Sources */,
+				C014 /* AIAction.swift in Sources */,
+				C015 /* AIActionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

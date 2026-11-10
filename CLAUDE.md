@@ -16,7 +16,7 @@ Open `lsNote.xcodeproj` in Xcode to run in debug mode. No linter is configured.
 ./build.sh test   # XCTest target lsNoteTests
 ```
 
-`lsNoteTests` has no app host: it compiles the pure model files (`Note`, `TagIndex`, `SearchQuery`, `TagMetadataStore`, `TagColor`, `NoteExport`, `HeadingAnchor`) directly into the test bundle, so tests never launch the app or touch real user data. When adding a file those tests need, add it to both targets' Sources. The Xcode project is hand-maintained (short object IDs such as `A017`/`B017`/`C00x`); a shared scheme lives in `lsNote.xcodeproj/xcshareddata/xcschemes/`.
+`lsNoteTests` has no app host: it compiles the pure model files (`Note`, `TagIndex`, `SearchQuery`, `TagMetadataStore`, `TagColor`, `NoteExport`, `HeadingAnchor`, `AIAction`) directly into the test bundle, so tests never launch the app or touch real user data. When adding a file those tests need, add it to both targets' Sources. The Xcode project is hand-maintained (short object IDs such as `A017`/`B017`/`C00x`); a shared scheme lives in `lsNote.xcodeproj/xcshareddata/xcschemes/`.
 
 ## Architecture
 
@@ -41,6 +41,8 @@ lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridg
 **Sidebar search focus:** Uses `NotificationCenter` (`Notification.Name.focusSearch`) instead of passing focus state through the view hierarchy — `lsNoteApp` posts on Cmd+Shift+F, `QueryField` listens.
 
 **Backup & export:** File menu commands call `ExportPanels` (AppKit panels/alerts), which delegates to the Foundation-only `MarkdownExport` and `NoteBackup` in `NoteExport.swift`. Backup zips the whole data folder; Markdown export writes front matter + body and rewrites `attachment:` links to a sibling `attachments/` folder. HTML export (`HTMLExport.swift`, app target only) reuses `MarkdownPreview.html(for:noteID:standaloneTitle:)` and pre-renders Mermaid to inline SVG in an off-screen `WKWebView`, producing one self-contained file.
+
+**AI actions:** see `docs/adr/0005-ai-actions-via-the-claude-api.md`. The toolbar's ✦ menu (`AIActionMenu`) sends the selection — or the whole note when nothing is selected — with a built-in, custom (Settings → AI, stored in `AppSettings.aiCustomActions`) or one-off prompt. `AIClient` streams the Claude Messages API over `URLSession` (no SDK; key in the keychain via `KeychainStore`); `AIActionSheet` shows the result for review and only Replace / Insert Below touch the note, through `MarkdownTextEditor.replaceText` so it is one undo step. `AIAction.swift` (actions, prompt building, reply tidying, SSE parsing) is Foundation-only and unit-tested.
 
 **Auto-delete:** `EditorView.onDisappear` calls `NoteStore.deleteEmptyNote(id:)`, removing the note and its attachments if the body is blank.
 
