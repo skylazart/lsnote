@@ -16,9 +16,30 @@ struct MarkdownPreview: NSViewRepresentable {
     static let mermaidSource: String? = Bundle.main.url(forResource: "mermaid.min", withExtension: "js")
         .flatMap { try? String(contentsOf: $0, encoding: .utf8) }
 
-    func makeNSView(context: Context) -> WKWebView {
+    /// Scrolls to the heading for `[Section](#section)` links (ids come from `HeadingAnchor`).
+    /// Handled in the page: it's loaded from a string (about:blank), and a script started from the
+    /// navigation delegate while WebKit decides on the click never runs.
+    private static let anchorLinkScript = """
+    document.addEventListener('click', event => {
+      const link = event.target.closest && event.target.closest('a[href^="#"]');
+      if (!link) return;
+      event.preventDefault();
+      let id = link.getAttribute('href').slice(1);
+      try { id = decodeURIComponent(id); } catch (_) {}
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    """
+
+    /// Preview-only setup; HTML export never loads these scripts.
+    static func makeConfiguration() -> WKWebViewConfiguration {
         let config = WKWebViewConfiguration()
-        let view = WKWebView(frame: .zero, configuration: config)
+        config.userContentController.addUserScript(
+            WKUserScript(source: anchorLinkScript, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
+        return config
+    }
+
+    func makeNSView(context: Context) -> WKWebView {
+        let view = WKWebView(frame: .zero, configuration: Self.makeConfiguration())
         view.navigationDelegate = context.coordinator
         view.setValue(false, forKey: "drawsBackground")
         return view
@@ -125,6 +146,7 @@ struct MarkdownPreview: NSViewRepresentable {
     private func renderMarkdown(_ md: String, noteID: UUID?) -> String {
         var lines = md.components(separatedBy: "\n")
         var html = ""
+        var anchors = HeadingAnchor.Slugger()
         var i = 0
 
         while i < lines.count {
@@ -154,7 +176,9 @@ struct MarkdownPreview: NSViewRepresentable {
             if let m = line.range(of: "^(#{1,6}) (.+)$", options: .regularExpression) {
                 let hashes = line[line.startIndex..<line.firstIndex(of: " ")!].count
                 let text = inline(String(line.dropFirst(hashes + 1)), noteID: noteID)
-                html += "<h\(hashes)>\(text)</h\(hashes)>\n"
+                // The id only holds letters, digits, `-` and `_`, so it needs no escaping.
+                let id = anchors.slug(for: HeadingAnchor.plainText(fromHTML: text))
+                html += "<h\(hashes) id=\"\(id)\">\(text)</h\(hashes)>\n"
                 i += 1; continue
             }
 
@@ -339,6 +363,8 @@ struct MarkdownPreview: NSViewRepresentable {
                 decisionHandler(.allow); return
             }
             decisionHandler(.cancel)
+            // In-page `#section` links are scrolled by `anchorLinkScript`; never offer to open them.
+            if url.scheme == "about" { return }
             let alert = NSAlert()
             alert.messageText = "Open External Link?"
             alert.informativeText = url.absoluteString

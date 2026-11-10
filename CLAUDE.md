@@ -16,7 +16,7 @@ Open `lsNote.xcodeproj` in Xcode to run in debug mode. No linter is configured.
 ./build.sh test   # XCTest target lsNoteTests
 ```
 
-`lsNoteTests` has no app host: it compiles the pure model files (`Note`, `TagIndex`, `SearchQuery`, `TagMetadataStore`, `TagColor`, `NoteExport`) directly into the test bundle, so tests never launch the app or touch real user data. When adding a file those tests need, add it to both targets' Sources. The Xcode project is hand-maintained (short object IDs such as `A017`/`B017`/`C00x`); a shared scheme lives in `lsNote.xcodeproj/xcshareddata/xcschemes/`.
+`lsNoteTests` has no app host: it compiles the pure model files (`Note`, `TagIndex`, `SearchQuery`, `TagMetadataStore`, `TagColor`, `NoteExport`, `HeadingAnchor`) directly into the test bundle, so tests never launch the app or touch real user data. When adding a file those tests need, add it to both targets' Sources. The Xcode project is hand-maintained (short object IDs such as `A017`/`B017`/`C00x`); a shared scheme lives in `lsNote.xcodeproj/xcshareddata/xcschemes/`.
 
 ## Architecture
 
@@ -32,7 +32,7 @@ lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridg
 
 **Multi-cursor:** `MultiCursorTextView` implements column editing (Alt+drag, Alt+Shift+↑/↓) and multi-match selection (⌘G next / ⇧⌘G previous / ⇧⌘L all occurrences; word-boundary matching when the seed selection was a double-click). Cursor state lives in its `cursors` array (NSTextView has no multi-cursor API); all simultaneous edits go through one `shouldChangeText(inRanges:replacementStrings:)` call so each operation is a single undo step. Escape, a plain click/selection change, or any external text mutation exits multi-cursor mode. `EditorView` shows a status badge ("3 of 7 matches selected") via the `onMultiCursorStatus` callback. The short-line column behavior (skip vs. insert at end of line) is configurable via `AppSettings.columnInsertAtLineEnd`.
 
-**Markdown preview:** `MarkdownPreview` wraps `WKWebView` with a fully custom GFM renderer written in Swift — no Markdown libraries. Attachment images use the syntax `![caption](attachment:uuid.png [WxH])` and are embedded as base64 data URIs to bypass WKWebView's file:// restrictions. ```` ```mermaid ```` fences become `<pre class="mermaid">`; the bundled mermaid.js is evaluated in `didFinish` only when the note has one.
+**Markdown preview:** `MarkdownPreview` wraps `WKWebView` with a fully custom GFM renderer written in Swift — no Markdown libraries. Attachment images use the syntax `![caption](attachment:uuid.png [WxH])` and are embedded as base64 data URIs to bypass WKWebView's file:// restrictions. ```` ```mermaid ```` fences become `<pre class="mermaid">`; the bundled mermaid.js is evaluated in `didFinish` only when the note has one. Headings get GitHub-compatible ids (`HeadingAnchor`); in-page `#section` links are scrolled by a `WKUserScript` click handler (preview only, so HTML exports stay script-free), and the navigation delegate never offers to open `about:` links externally.
 
 **Images:** `ImageStore` saves PNGs to `~/Library/Application Support/lsNote/attachments/<noteID>/`. Insertion happens via file picker or clipboard paste from `EditorView`'s toolbar.
 
