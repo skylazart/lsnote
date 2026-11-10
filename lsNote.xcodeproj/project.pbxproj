@@ -41,8 +41,11 @@
 		B022 /* NoteExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A023 /* NoteExport.swift */; };
 		B023 /* ExportPanels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A024 /* ExportPanels.swift */; };
 		B025 /* HTMLExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A028 /* HTMLExport.swift */; };
+		B026 /* HeadingAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A029 /* HeadingAnchor.swift */; };
 		C010 /* NoteExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A023 /* NoteExport.swift */; };
 		C011 /* NoteExportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D005 /* NoteExportTests.swift */; };
+		C012 /* HeadingAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A029 /* HeadingAnchor.swift */; };
+		C013 /* HeadingAnchorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D006 /* HeadingAnchorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -80,7 +83,9 @@
 		A023 /* NoteExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteExport.swift; sourceTree = "<group>"; };
 		A024 /* ExportPanels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportPanels.swift; sourceTree = "<group>"; };
 		A028 /* HTMLExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLExport.swift; sourceTree = "<group>"; };
+		A029 /* HeadingAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadingAnchor.swift; sourceTree = "<group>"; };
 		D005 /* NoteExportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteExportTests.swift; sourceTree = "<group>"; };
+		D006 /* HeadingAnchorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadingAnchorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +152,7 @@
 				A023 /* NoteExport.swift */,
 				A024 /* ExportPanels.swift */,
 				A028 /* HTMLExport.swift */,
+				A029 /* HeadingAnchor.swift */,
 				GRP4 /* Vendor */,
 			);
 			path = lsNote;
@@ -169,6 +175,7 @@
 				D003 /* SearchQueryTests.swift */,
 				D004 /* TagMetadataStoreTests.swift */,
 				D005 /* NoteExportTests.swift */,
+				D006 /* HeadingAnchorTests.swift */,
 			);
 			path = lsNoteTests;
 			sourceTree = "<group>";
@@ -306,6 +313,7 @@
 				B022 /* NoteExport.swift in Sources */,
 				B023 /* ExportPanels.swift in Sources */,
 				B025 /* HTMLExport.swift in Sources */,
+				B026 /* HeadingAnchor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -324,6 +332,8 @@
 				C009 /* TagMetadataStoreTests.swift in Sources */,
 				C010 /* NoteExport.swift in Sources */,
 				C011 /* NoteExportTests.swift in Sources */,
+				C012 /* HeadingAnchor.swift in Sources */,
+				C013 /* HeadingAnchorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

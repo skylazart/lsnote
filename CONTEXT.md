@@ -57,6 +57,7 @@ lsNote/
 ├── NoteExport.swift       # MarkdownExport (notes → .md files) and NoteBackup (data folder → zip); Foundation-only
 ├── ExportPanels.swift     # Save/open panels, error alerts and Finder reveal for export and backup
 ├── HTMLExport.swift       # Note → one self-contained HTML file (preview renderer; diagrams pre-rendered off-screen)
+├── HeadingAnchor.swift    # GitHub-compatible heading ids (slug + duplicate suffixes); Foundation-only
 └── Vendor/                # mermaid.min.js (bundled resource), its license and provenance README
 lsNoteTests/               # XCTest target; compiles the pure model files directly (no app host)
 ```
@@ -117,7 +118,7 @@ lsNoteTests/               # XCTest target; compiles the pure model files direct
 When the editor disappears, `NoteStore.deleteEmptyNote` removes the note if its body is blank (also deletes any attachments).
 
 ### Markdown Preview
-Custom renderer (no Markdown libraries). Supports: headings, bold/italic/strikethrough, inline code, fenced code blocks (collapsible `<details>`), blockquotes, unordered/ordered lists, GFM tables, horizontal rules, links, standard images, attachment images (`![title](attachment:filename.png [WxH])`), Mermaid diagrams (```` ```mermaid ```` fences, rendered by the bundled mermaid.js only when present; see ADR 0004), and inline math (`$\command$` — Greek letters, binary/relation operators, arrows, and other common symbols mapped to Unicode; see `mathSymbols` in `MarkdownPreview.swift`).
+Custom renderer (no Markdown libraries). Supports: headings (with GitHub-compatible `id`s from `HeadingAnchor`, so `[Section](#section)` links scroll within the preview and work in HTML exports), bold/italic/strikethrough, inline code, fenced code blocks (collapsible `<details>`), blockquotes, unordered/ordered lists, GFM tables, horizontal rules, links, standard images, attachment images (`![title](attachment:filename.png [WxH])`), Mermaid diagrams (```` ```mermaid ```` fences, rendered by the bundled mermaid.js only when present; see ADR 0004), and inline math (`$\command$` — Greek letters, binary/relation operators, arrows, and other common symbols mapped to Unicode; see `mathSymbols` in `MarkdownPreview.swift`).
 
 ### Backup & Markdown Export (File menu)
 - **Back Up All Notes…** zips `notes.json`, `tags.json` and `attachments/` into `lsNote Backup <yyyy-MM-dd HHmmss>.zip` (staged in a temp folder, zipped with `NSFileCoordinator`'s `.forUploading`). To restore, quit the app and copy the unzipped folder's contents into `~/Library/Application Support/lsNote/`.
