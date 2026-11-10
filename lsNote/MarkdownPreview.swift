@@ -66,9 +66,37 @@ struct MarkdownPreview: NSViewRepresentable {
     static func mermaidRunScript(theme: String) -> String {
         """
         (mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: \(theme) }),
-         mermaid.run({ querySelector: '.mermaid', suppressErrors: true }))
+         mermaid.run({ querySelector: '.mermaid', suppressErrors: true }))\(mermaidLabelContrastFix)
         """
     }
+
+    /// Runs after rendering. A diagram that sets its own node fills (`classDef x fill:#e9f2fc`)
+    /// without a text color gets the theme's label color, which in the dark theme is light text
+    /// on the author's light fill. Any node label whose contrast with its node's fill is below
+    /// 3:1 is switched to whichever of near-black or near-white reads better; labels that are
+    /// already legible, including ones with an explicit `color`, are left alone.
+    private static let mermaidLabelContrastFix = """
+    .then(() => {
+      const rgb = c => (c.match(/[\\d.]+/g) || []).map(Number);
+      const lum = c => {
+        const [r, g, b] = rgb(c).map(v => (v /= 255) <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      };
+      const contrast = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+      const dark = 'rgb(28, 28, 30)', light = 'rgb(242, 242, 247)';
+      document.querySelectorAll('.mermaid svg g.node').forEach(node => {
+        const shape = node.querySelector('rect, polygon, circle, ellipse, path');
+        const fill = shape ? getComputedStyle(shape).fill : '';
+        const parts = rgb(fill);
+        if (parts.length < 3 || parts[3] < 0.5) return;
+        node.querySelectorAll('.nodeLabel, .nodeLabel *, text, tspan').forEach(label => {
+          const prop = label instanceof SVGElement ? 'fill' : 'color';
+          if (contrast(getComputedStyle(label)[prop], fill) >= 3) return;
+          label.style.setProperty(prop, contrast(dark, fill) > contrast(light, fill) ? dark : light, 'important');
+        });
+      });
+    })
+    """
 
     /// Extra rules for an exported file: unlike the preview it has no window behind it, so it needs
     /// its own page background, and diagrams (always rendered with the light theme) get a light card.
