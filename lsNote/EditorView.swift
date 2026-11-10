@@ -15,6 +15,7 @@ struct EditorView: View {
     @State private var matchCount = 0
     @State private var multiCursorStatus: String? = nil
     @State private var pushedBodies = PushedBodies()
+    @State private var aiRequest: AIRequest? = nil
 
     private var isLocked: Bool { note.isLocked }
 
@@ -102,6 +103,49 @@ struct EditorView: View {
             store.deleteEmptyNote(id: note.id)
         }
         .background(findShortcutCapture)
+        .sheet(item: $aiRequest) { request in
+            AIActionSheet(request: request, isLocked: isLocked,
+                          onReplace: { applyAIResult($0, to: request, replacing: true) },
+                          onInsertBelow: { applyAIResult($0, to: request, replacing: false) })
+        }
+    }
+
+    /// Opens the AI sheet for the selection, or for the whole note when nothing is selected.
+    private func startAIAction(_ action: AIAction?) {
+        guard let tv = textView else { return }
+        let document = tv.string as NSString
+        let selection = tv.selectedRange()
+        let isSelection = selection.length > 0
+        let range = isSelection ? selection : NSRange(location: 0, length: document.length)
+        let source = document.substring(with: range)
+        guard !source.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            NSSound.beep()
+            return
+        }
+        aiRequest = AIRequest(action: action, source: source, range: range, isSelection: isSelection)
+    }
+
+    private func applyAIResult(_ result: String, to request: AIRequest, replacing: Bool) {
+        guard let tv = textView, !isLocked else { return }
+        let document = tv.string as NSString
+        // The sheet is modal, but never write over text that is no longer what was sent.
+        guard NSMaxRange(request.range) <= document.length,
+              document.substring(with: request.range) == request.source else {
+            NSSound.beep()
+            return
+        }
+        if replacing {
+            MarkdownTextEditor.replaceText(in: tv, range: request.range, with: result)
+        } else {
+            // Own paragraph after the source; no extra blank line when one already follows.
+            let end = NSMaxRange(request.range)
+            let separator = request.source.hasSuffix("\n") ? "\n" : "\n\n"
+            let followedByText = end < document.length && document.character(at: end) != 0x0A
+            MarkdownTextEditor.replaceText(
+                in: tv, range: NSRange(location: end, length: 0),
+                with: separator + result + (followedByText ? "\n" : ""),
+                selecting: NSRange(location: end + (separator as NSString).length, length: (result as NSString).length))
+        }
     }
 
     // Invisible view that captures ⌘F without conflicting with the sidebar search
@@ -245,6 +289,9 @@ struct EditorView: View {
                 .contentShape(Rectangle())
                 .help("Insert Link (⌘L)")
                 .keyboardShortcut("l", modifiers: .command)
+
+                AIActionMenu(customActions: settings.aiCustomActions.filter(\.isRunnable)) { startAIAction($0) }
+                    .equatable()
 
                 Divider().frame(height: 16).padding(.horizontal, 4)
             }

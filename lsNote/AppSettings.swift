@@ -30,6 +30,19 @@ final class AppSettings: ObservableObject {
         didSet { objectWillChange.send() }
     }
 
+    /// Model used for AI actions (any Claude model id).
+    @AppStorage("aiModel") var aiModel: String = AIClient.defaultModel {
+        didSet { objectWillChange.send() }
+    }
+    /// User-defined AI actions, as JSON (see `AIAction.encodeList`).
+    @AppStorage("aiCustomActions") private var aiCustomActionsJSON: String = "[]" {
+        didSet { objectWillChange.send() }
+    }
+    var aiCustomActions: [AIAction] {
+        get { AIAction.decodeList(aiCustomActionsJSON) }
+        set { aiCustomActionsJSON = AIAction.encodeList(newValue) }
+    }
+
     var font: NSFont {
         NSFont(name: fontName, size: fontSize) ?? .monospacedSystemFont(ofSize: fontSize, weight: .regular)
     }

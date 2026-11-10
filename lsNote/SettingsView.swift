@@ -10,6 +10,14 @@ struct SettingsView: View {
     }()
 
     var body: some View {
+        TabView {
+            general.tabItem { Label("General", systemImage: "gearshape") }
+            AISettingsView().tabItem { Label("AI", systemImage: "sparkles") }
+        }
+        .frame(width: 480, height: 440)
+    }
+
+    private var general: some View {
         Form {
             Picker("Font:", selection: $settings.fontName) {
                 ForEach(availableFonts, id: \.self) { family in
@@ -45,7 +53,6 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 400, height: 300)
     }
 
     private func chooseCustomCSS() {
@@ -55,5 +62,85 @@ struct SettingsView: View {
         panel.canChooseDirectories = false
         guard panel.runModal() == .OK, let url = panel.url else { return }
         settings.customCSSPath = url.path
+    }
+}
+
+/// Settings → AI: the Anthropic API key (keychain), the model, and the user's custom actions.
+struct AISettingsView: View {
+    @ObservedObject private var settings = AppSettings.shared
+    @State private var keyDraft = ""
+    @State private var hasSavedKey = KeychainStore.read()?.isEmpty == false
+    @State private var keyError = false
+    @State private var actions: [AIAction] = AppSettings.shared.aiCustomActions
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    SecureField("API key:", text: $keyDraft,
+                                prompt: Text(hasSavedKey ? "Saved in your keychain" : "sk-ant-…"))
+                        .onSubmit(saveKey)
+                    Button("Save", action: saveKey).disabled(keyDraft.isEmpty)
+                    if hasSavedKey {
+                        Button("Remove") {
+                            KeychainStore.save("")
+                            hasSavedKey = false
+                        }
+                    }
+                }
+                if keyError {
+                    Text("The key could not be saved to the keychain.").font(.caption).foregroundStyle(.red)
+                }
+                TextField("Model:", text: $settings.aiModel, prompt: Text(AIClient.defaultModel))
+            } header: {
+                Text("Anthropic API")
+            } footer: {
+                Text("Running an AI action sends the selected text (or the whole note) to Anthropic's API. Nothing is sent otherwise.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+
+            Section {
+                ForEach($actions) { $action in
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            TextField("Name", text: $action.name, prompt: Text("Name shown in the menu"))
+                                .labelsHidden()
+                            Button {
+                                actions.removeAll { $0.id == action.id }
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.borderless)
+                            .help("Delete this action")
+                        }
+                        TextField("Prompt", text: $action.prompt,
+                                  prompt: Text("Instruction, e.g. “Rewrite in a formal tone.”"), axis: .vertical)
+                            .labelsHidden()
+                            .lineLimit(2...5)
+                    }
+                    .padding(.vertical, 2)
+                }
+                Button("Add Action") {
+                    actions.append(AIAction(name: "New Action", prompt: ""))
+                }
+            } header: {
+                Text("Custom Actions")
+            } footer: {
+                Text("Listed in the editor's ✦ menu after the built-in actions. Actions without a name or prompt are hidden.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .formStyle(.grouped)
+        .onChange(of: actions) { _, newValue in settings.aiCustomActions = newValue }
+    }
+
+    private func saveKey() {
+        let key = keyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !key.isEmpty else { return }
+        keyError = !KeychainStore.save(key)
+        if !keyError {
+            hasSavedKey = true
+            keyDraft = ""
+        }
     }
 }

@@ -58,6 +58,9 @@ lsNote/
 ├── ExportPanels.swift     # Save/open panels, error alerts and Finder reveal for export and backup
 ├── HTMLExport.swift       # Note → one self-contained HTML file (preview renderer; diagrams pre-rendered off-screen)
 ├── HeadingAnchor.swift    # GitHub-compatible heading ids (slug + duplicate suffixes); Foundation-only
+├── AIAction.swift         # AI actions (built-in + custom), prompt building, reply tidying, SSE parsing; Foundation-only
+├── AIClient.swift         # Claude Messages API streaming client + keychain storage of the API key
+├── AIActionSheet.swift    # Editor ✦ menu and the review sheet (Replace / Insert Below / Copy)
 └── Vendor/                # mermaid.min.js (bundled resource), its license and provenance README
 lsNoteTests/               # XCTest target; compiles the pure model files directly (no app host)
 ```
