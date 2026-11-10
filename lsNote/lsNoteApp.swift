@@ -60,6 +60,11 @@ struct lsNoteApp: App {
                 }
                 .keyboardShortcut("e", modifiers: [.command, .shift])
                 .disabled(store.selectedNote == nil)
+                Button("Export Note as HTML…") {
+                    if let note = store.selectedNote { ExportPanels.exportHTML(note) }
+                }
+                .keyboardShortcut("e", modifiers: [.command, .option])
+                .disabled(store.selectedNote == nil)
                 Button("Export All Notes as Markdown…") {
                     ExportPanels.exportAll(store.notes)
                 }

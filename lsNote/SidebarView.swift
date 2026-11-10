@@ -24,6 +24,9 @@ struct SidebarView: View {
                             Button("Export as Markdown…") {
                                 ExportPanels.export(note)
                             }
+                            Button("Export as HTML…") {
+                                ExportPanels.exportHTML(note)
+                            }
                             Divider()
                             Button("Delete", role: .destructive) {
                                 store.delete(id: note.id)

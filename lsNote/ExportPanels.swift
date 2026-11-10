@@ -1,7 +1,7 @@
 import AppKit
 import UniformTypeIdentifiers
 
-/// File panels and error reporting for backup and Markdown export; the work itself is in NoteExport.swift.
+/// File panels and error reporting for backup and export; the work itself is in NoteExport.swift and HTMLExport.swift.
 @MainActor
 enum ExportPanels {
     private static var attachmentsRoot: URL {
@@ -62,15 +62,40 @@ enum ExportPanels {
         }
     }
 
+    /// Saves the note as one self-contained HTML file (see HTMLExport.swift).
+    static func exportHTML(_ note: Note) {
+        let panel = NSSavePanel()
+        panel.title = "Export Note as HTML"
+        var taken = Set<String>()
+        panel.nameFieldStringValue = MarkdownExport.fileName(for: note, taken: &taken, pathExtension: "html")
+        panel.allowedContentTypes = [.html]
+        panel.canCreateDirectories = true
+        panel.message = "Images and diagrams are embedded in the file."
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        Task {
+            do {
+                let html = try await HTMLExport.document(for: note)
+                try Data(html.utf8).write(to: url, options: .atomic)
+                NSWorkspace.shared.activateFileViewerSelecting([url])
+            } catch {
+                report("The note could not be exported.", error)
+            }
+        }
+    }
+
     private static func perform(_ failure: String, _ work: () throws -> Void) {
         do {
             try work()
         } catch {
-            let alert = NSAlert()
-            alert.alertStyle = .warning
-            alert.messageText = failure
-            alert.informativeText = error.localizedDescription
-            alert.runModal()
+            report(failure, error)
         }
+    }
+
+    private static func report(_ failure: String, _ error: Error) {
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = failure
+        alert.informativeText = error.localizedDescription
+        alert.runModal()
     }
 }

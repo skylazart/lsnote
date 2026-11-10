@@ -40,6 +40,7 @@
 		B021 /* QueryField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A022 /* QueryField.swift */; };
 		B022 /* NoteExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A023 /* NoteExport.swift */; };
 		B023 /* ExportPanels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A024 /* ExportPanels.swift */; };
+		B025 /* HTMLExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A028 /* HTMLExport.swift */; };
 		C010 /* NoteExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A023 /* NoteExport.swift */; };
 		C011 /* NoteExportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D005 /* NoteExportTests.swift */; };
 /* End PBXBuildFile section */
@@ -78,6 +79,7 @@
 		A022 /* QueryField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryField.swift; sourceTree = "<group>"; };
 		A023 /* NoteExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteExport.swift; sourceTree = "<group>"; };
 		A024 /* ExportPanels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportPanels.swift; sourceTree = "<group>"; };
+		A028 /* HTMLExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLExport.swift; sourceTree = "<group>"; };
 		D005 /* NoteExportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteExportTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -144,6 +146,7 @@
 				A022 /* QueryField.swift */,
 				A023 /* NoteExport.swift */,
 				A024 /* ExportPanels.swift */,
+				A028 /* HTMLExport.swift */,
 				GRP4 /* Vendor */,
 			);
 			path = lsNote;
@@ -302,6 +305,7 @@
 				B021 /* QueryField.swift in Sources */,
 				B022 /* NoteExport.swift in Sources */,
 				B023 /* ExportPanels.swift in Sources */,
+				B025 /* HTMLExport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

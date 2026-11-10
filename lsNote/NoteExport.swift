@@ -8,8 +8,8 @@ enum MarkdownExport {
     private static let attachmentPattern = try! NSRegularExpression(
         pattern: #"!\[([^\]]*)\]\(attachment:([^\s\)]+)(?:\s+(\d*)x(\d*))?\)"#)
 
-    /// File-system-safe `.md` name derived from the title, unique (case-insensitively) within `taken`.
-    static func fileName(for note: Note, taken: inout Set<String>) -> String {
+    /// File-system-safe name derived from the title, unique (case-insensitively) within `taken`.
+    static func fileName(for note: Note, taken: inout Set<String>, pathExtension ext: String = "md") -> String {
         let illegal = CharacterSet(charactersIn: "/\\:*?\"<>|").union(.controlCharacters).union(.newlines)
         var base = note.title.components(separatedBy: illegal).joined(separator: "-")
             .trimmingCharacters(in: .whitespaces)
@@ -17,10 +17,10 @@ enum MarkdownExport {
         base = String(base.prefix(120)).trimmingCharacters(in: .whitespaces)
         if base.isEmpty { base = "Untitled" }
 
-        var name = "\(base).md"
+        var name = "\(base).\(ext)"
         var n = 2
         while taken.contains(name.lowercased()) {
-            name = "\(base) \(n).md"
+            name = "\(base) \(n).\(ext)"
             n += 1
         }
         taken.insert(name.lowercased())
