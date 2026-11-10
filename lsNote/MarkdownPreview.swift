@@ -350,10 +350,12 @@ struct MarkdownPreview: NSViewRepresentable {
         t = t.replacingOccurrences(of: #"\*\*\*(.+?)\*\*\*"#, with: "<strong><em>$1</em></strong>", options: .regularExpression)
         // Bold
         t = t.replacingOccurrences(of: #"\*\*(.+?)\*\*"#, with: "<strong>$1</strong>", options: .regularExpression)
-        t = t.replacingOccurrences(of: #"__(.+?)__"#, with: "<strong>$1</strong>", options: .regularExpression)
+        // Underscore emphasis never opens or closes inside a word (GFM), so
+        // identifiers like DIAMETER_UNABLE_TO_DELIVER keep their underscores.
+        t = t.replacingOccurrences(of: #"(?<![\p{L}\p{N}_])__(?![\s_])(.+?)(?<![\s_])__(?![\p{L}\p{N}_])"#, with: "<strong>$1</strong>", options: .regularExpression)
         // Italic
         t = t.replacingOccurrences(of: #"\*(.+?)\*"#, with: "<em>$1</em>", options: .regularExpression)
-        t = t.replacingOccurrences(of: #"_(.+?)_"#, with: "<em>$1</em>", options: .regularExpression)
+        t = t.replacingOccurrences(of: #"(?<![\p{L}\p{N}_])_(?![\s_])(.+?)(?<![\s_])_(?![\p{L}\p{N}_])"#, with: "<em>$1</em>", options: .regularExpression)
         // Strikethrough
         t = t.replacingOccurrences(of: #"~~(.+?)~~"#, with: "<del>$1</del>", options: .regularExpression)
         // Inline code
