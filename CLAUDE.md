@@ -40,7 +40,7 @@ lsNote is a macOS-only (14.0+) note-taking app. SwiftUI for layout, AppKit bridg
 
 **Sidebar search focus:** Uses `NotificationCenter` (`Notification.Name.focusSearch`) instead of passing focus state through the view hierarchy — `lsNoteApp` posts on Cmd+Shift+F, `QueryField` listens.
 
-**Backup & export:** File menu commands call `ExportPanels` (AppKit panels/alerts), which delegates to the Foundation-only `MarkdownExport` and `NoteBackup` in `NoteExport.swift`. Backup zips the whole data folder; Markdown export writes front matter + body and rewrites `attachment:` links to a sibling `attachments/` folder.
+**Backup & export:** File menu commands call `ExportPanels` (AppKit panels/alerts), which delegates to the Foundation-only `MarkdownExport` and `NoteBackup` in `NoteExport.swift`. Backup zips the whole data folder; Markdown export writes front matter + body and rewrites `attachment:` links to a sibling `attachments/` folder. HTML export (`HTMLExport.swift`, app target only) reuses `MarkdownPreview.html(for:noteID:standaloneTitle:)` and pre-renders Mermaid to inline SVG in an off-screen `WKWebView`, producing one self-contained file.
 
 **Auto-delete:** `EditorView.onDisappear` calls `NoteStore.deleteEmptyNote(id:)`, removing the note and its attachments if the body is blank.
 

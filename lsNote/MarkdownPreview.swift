@@ -26,8 +26,7 @@ struct MarkdownPreview: NSViewRepresentable {
 
     func updateNSView(_ webView: WKWebView, context: Context) {
         context.coordinator.needsMermaid = Self.mermaidSource != nil && Self.containsMermaid(text)
-        webView.loadHTMLString(html(for: text, attachments: note?.attachments ?? [], noteID: note?.id),
-                               baseURL: nil)
+        webView.loadHTMLString(html(for: text, noteID: note?.id), baseURL: nil)
     }
 
     private static func isMermaidFence(_ line: String) -> Bool {
@@ -40,8 +39,37 @@ struct MarkdownPreview: NSViewRepresentable {
 
     // MARK: - Minimal GFM renderer
 
-    private func html(for markdown: String, attachments: [String], noteID: UUID?) -> String {
+    /// A single JS expression that initializes mermaid and renders every `pre.mermaid` on the page.
+    /// Its value is a promise that resolves when all are done; a diagram with a syntax error
+    /// becomes mermaid's error graphic instead of rejecting. `theme` is itself a JS expression.
+    static func mermaidRunScript(theme: String) -> String {
+        """
+        (mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: \(theme) }),
+         mermaid.run({ querySelector: '.mermaid', suppressErrors: true }))
+        """
+    }
+
+    /// Extra rules for an exported file: unlike the preview it has no window behind it, so it needs
+    /// its own page background, and diagrams (always rendered with the light theme) get a light card.
+    private static let standaloneCSS = """
+    <style>
+      body { background: #fff; max-width: 860px; margin: 0 auto; padding: 24px; }
+      figure img { height: auto; }
+      @media (prefers-color-scheme: dark) {
+        body { background: #1c1c1e; }
+        pre.mermaid { background: #fff; border-radius: 0 0 6px 6px; }
+      }
+    </style>
+    """
+
+    /// The full HTML page. With `standaloneTitle` the page is meant to be saved to a file
+    /// (HTML export): it gets a `<title>` and the standalone styles.
+    func html(for markdown: String, noteID: UUID?, standaloneTitle: String? = nil) -> String {
         let codeFontSize = max(fontSize - 1, 8)
+        let standaloneHead = standaloneTitle.map {
+            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+                + "<title>\(escape($0))</title>\n" + Self.standaloneCSS
+        } ?? ""
         return """
         <!DOCTYPE html>
         <html>
@@ -86,6 +114,7 @@ struct MarkdownPreview: NSViewRepresentable {
             figcaption { color: #888; }
           }
         </style>
+        \(standaloneHead)
         \(customCSS.map { "<style>\n\($0)\n</style>" } ?? "")
         </head>
         <body>\(renderMarkdown(markdown, noteID: noteID))</body>
@@ -296,16 +325,10 @@ struct MarkdownPreview: NSViewRepresentable {
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             guard needsMermaid, let source = MarkdownPreview.mermaidSource else { return }
-            let run = """
-            mermaid.initialize({
-              startOnLoad: false,
-              securityLevel: 'strict',
-              theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
-            });
-            mermaid.run();
-            """
+            let run = MarkdownPreview.mermaidRunScript(
+                theme: "matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'")
             // Trailing `void 0`: the last value (a Promise) can't be bridged back to Swift.
-            webView.evaluateJavaScript(source + "\n;" + run + "\nvoid 0;")
+            webView.evaluateJavaScript(source + "\n;" + run + ";\nvoid 0;")
         }
 
         func webView(_ webView: WKWebView,

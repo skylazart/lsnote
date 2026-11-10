@@ -32,6 +32,8 @@ final class NoteExportTests: XCTestCase {
         XCTAssertEqual(MarkdownExport.fileName(for: makeNote([], title: "  "), taken: &taken), "Untitled.md")
         XCTAssertEqual(MarkdownExport.fileName(for: makeNote([], title: "..hidden"), taken: &taken), "hidden.md")
         XCTAssertEqual(MarkdownExport.fileName(for: makeNote([], title: "a/b\nc"), taken: &taken), "a-b-c.md")
+        XCTAssertEqual(MarkdownExport.fileName(for: makeNote([], title: "a/b\nc"), taken: &taken, pathExtension: "html"),
+                       "a-b-c.html")
     }
 
     // MARK: Document

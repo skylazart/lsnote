@@ -56,6 +56,7 @@ lsNote/
 ├── ImageStore.swift       # PNG save/load/delete helpers
 ├── NoteExport.swift       # MarkdownExport (notes → .md files) and NoteBackup (data folder → zip); Foundation-only
 ├── ExportPanels.swift     # Save/open panels, error alerts and Finder reveal for export and backup
+├── HTMLExport.swift       # Note → one self-contained HTML file (preview renderer; diagrams pre-rendered off-screen)
 └── Vendor/                # mermaid.min.js (bundled resource), its license and provenance README
 lsNoteTests/               # XCTest target; compiles the pure model files directly (no app host)
 ```
@@ -69,6 +70,7 @@ lsNoteTests/               # XCTest target; compiles the pure model files direct
 | ⌘F | Open in-note find bar (EditorView) |
 | ⇧⌘F | Focus sidebar search field |
 | ⇧⌘E | Export selected note as Markdown |
+| ⌥⌘E | Export selected note as HTML |
 | `#` / `-#` in search | Tag suggestions (↑/↓, Return/Tab accept, Esc dismiss) |
 | Backspace in empty search | Remove last tag chip |
 | ⌘B | Bold selection |
@@ -120,6 +122,7 @@ Custom renderer (no Markdown libraries). Supports: headings, bold/italic/striket
 ### Backup & Markdown Export (File menu)
 - **Back Up All Notes…** zips `notes.json`, `tags.json` and `attachments/` into `lsNote Backup <yyyy-MM-dd HHmmss>.zip` (staged in a temp folder, zipped with `NSFileCoordinator`'s `.forUploading`). To restore, quit the app and copy the unzipped folder's contents into `~/Library/Application Support/lsNote/`.
 - **Export All Notes as Markdown…** asks for a parent folder and writes into a new `lsNote Export <timestamp>` subfolder, so nothing existing is overwritten. **Export Note as Markdown…** (⇧⌘E, or the note list context menu) saves one file.
+- **Export Note as HTML…** (⌥⌘E, or the note list context menu) saves the note as a single self-contained `.html` file that looks like the preview (same renderer, font settings and custom CSS). Attachment images are embedded as base64 data URIs. Mermaid diagrams are rendered to inline SVG at export time by loading the page in an off-screen `WKWebView` and serializing the DOM, so the file contains no JavaScript and works offline; diagrams always use mermaid's light theme (on a light card in dark mode).
 - Each file is `<title>.md` (illegal path characters → `-`, duplicates get ` 2`, ` 3`…) with YAML front matter (`title`, `tags`, `created`, `modified`) and the body. `attachment:` images are rewritten to `attachments/<file>.png` and the PNGs copied next to the Markdown; the optional `WxH` size is dropped. File dates are set to the note's.
 
 ## Attachment Images
