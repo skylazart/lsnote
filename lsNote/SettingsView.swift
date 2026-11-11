@@ -60,6 +60,18 @@ struct SettingsView: View {
         panel.allowedContentTypes = [UTType(filenameExtension: "css")].compactMap { $0 }
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
+        if !settings.customCSSPath.isEmpty {
+            // Start where the current stylesheet lives. Pointing directoryURL at the file itself
+            // makes the panel open its folder with the file preselected; fall back to the folder
+            // when the file has since been moved or deleted.
+            let current = URL(fileURLWithPath: settings.customCSSPath)
+            let fm = FileManager.default
+            if fm.fileExists(atPath: current.path) {
+                panel.directoryURL = current
+            } else if fm.fileExists(atPath: current.deletingLastPathComponent().path) {
+                panel.directoryURL = current.deletingLastPathComponent()
+            }
+        }
         guard panel.runModal() == .OK, let url = panel.url else { return }
         settings.customCSSPath = url.path
     }
