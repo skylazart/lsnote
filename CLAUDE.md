@@ -23,6 +23,24 @@ open -n build/Build/Products/Debug/lsNote.app
 
 Tell the user what to click to see the change. The debug build shares `~/Library/Application Support/lsNote/` with the installed `/Applications/lsNote.app`; if that copy is running (`pgrep -lf lsNote.app/Contents/MacOS`), ask whether to quit it first, because two instances saving `notes.json` can overwrite each other's edits. Skip the launch for test-only or docs-only changes.
 
+## Installing after commit/merge
+
+Once an app change is committed and merged into `main`, replace the user's installed copy with a Release build and restart it:
+
+```bash
+xcodebuild -scheme lsNote -configuration Release -derivedDataPath build build
+# Quit every running lsNote (debug and installed) the normal way, so pending notes are saved:
+for pid in $(pgrep -f "lsNote.app/Contents/MacOS/lsNote"); do
+  osascript -l JavaScript -e "ObjC.import('AppKit'); \$.NSRunningApplication.runningApplicationWithProcessIdentifier($pid).terminate"
+done
+# Wait until pgrep finds none before continuing; never kill -9 (it skips the save on quit).
+mv /Applications/lsNote.app "<scratchpad>/lsNote-previous.app"   # keep the old copy for rollback
+ditto build/Build/Products/Release/lsNote.app /Applications/lsNote.app
+open /Applications/lsNote.app
+```
+
+Tell the user where the previous copy was moved. Skip this for test-only or docs-only changes.
+
 ```bash
 ./build.sh test   # XCTest target lsNoteTests
 ```
