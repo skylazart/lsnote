@@ -12,6 +12,17 @@ xcodebuild -scheme lsNote -configuration Release -derivedDataPath build
 
 Open `lsNote.xcodeproj` in Xcode to run in debug mode. No linter is configured.
 
+## Hand-testing before commit
+
+After an app change builds, launch the new binary so the user can try it, and wait for their OK before committing:
+
+```bash
+xcodebuild -scheme lsNote -configuration Debug -derivedDataPath build build
+open -n build/Build/Products/Debug/lsNote.app
+```
+
+Tell the user what to click to see the change. The debug build shares `~/Library/Application Support/lsNote/` with the installed `/Applications/lsNote.app`; if that copy is running (`pgrep -lf lsNote.app/Contents/MacOS`), ask whether to quit it first, because two instances saving `notes.json` can overwrite each other's edits. Skip the launch for test-only or docs-only changes.
+
 ```bash
 ./build.sh test   # XCTest target lsNoteTests
 ```
